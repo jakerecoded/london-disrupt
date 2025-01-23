@@ -1,4 +1,4 @@
-import './App.css'
+import Map from './components/Map';
 
 function App() {
   return (
@@ -8,11 +8,7 @@ function App() {
           Phone Theft Tracker
         </h1>
         <div className="bg-white shadow-lg rounded-lg p-6">
-          <p className="text-gray-600">
-            Welcome to the Phone Theft Tracker application. 
-            If this text is styled and centered in a white card with a shadow, 
-            Tailwind is working correctly!
-          </p>
+          <Map />
         </div>
       </div>
     </div>
