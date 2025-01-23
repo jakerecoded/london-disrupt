@@ -3,11 +3,18 @@ import Map, { NavigationControl, Marker } from 'react-map-gl';
 import { v4 as uuidv4 } from 'uuid'; // We'll need to install this
 import MapToolbar from './MapToolbar';
 import LocationSearch from './LocationSearch';
+import { faExclamation } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface TheftLocation {
   id: string;
   longitude: number;
   latitude: number;
+  date: string;
+  bikeDescription: string;
+  theftDescription?: string;
+  lockType?: string;
+  policeCaseNumber?: string;
 }
 
 function MapComponent() {
@@ -57,7 +64,7 @@ function MapComponent() {
         onClick={handleMapClick}
       >
         <LocationSearch />
-        <MapToolbar onAddLocation={handleToolbarClick} />
+        <MapToolbar onAddLocation={handleToolbarClick} isAddingLocation={isAddingLocation} />
         <NavigationControl position="bottom-right" />
       
         {theftLocations.map(location => (
@@ -65,9 +72,17 @@ function MapComponent() {
             key={location.id}
             longitude={location.longitude}
             latitude={location.latitude}
-            color="#FF0000" // Add bright red color
-            scale={1.5} // Make it a bit larger
-          />
+            scale={0.7} // Make it a bit larger
+          >
+           <div className="relative">
+            <div className="w-6 h-6 bg-red-700 rounded-full">
+              <FontAwesomeIcon 
+                icon={faExclamation} 
+                className="text-white text-sm absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              />
+            </div>
+          </div> 
+          </Marker>
         ))}
     </Map>
   );

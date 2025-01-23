@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   IconMap,
   IconLayersIntersect,
@@ -43,10 +43,17 @@ const toolbarItems = [
 
 interface MapToolbarProps {
     onAddLocation: () => void;
+    isAddingLocation: boolean;
   }
 
-function MapToolbar({ onAddLocation }: MapToolbarProps) {
+function MapToolbar({ onAddLocation, isAddingLocation }: MapToolbarProps) {
   const [active, setActive] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isAddingLocation) {
+      setActive(null);
+    }
+  }, [isAddingLocation]);
 
   const handleClick = (index: number) => {
     if (index === 0) {
