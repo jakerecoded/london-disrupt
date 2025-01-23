@@ -15,6 +15,10 @@ function MapComponent() {
   const [theftLocations, setTheftLocations] = useState<TheftLocation[]>([]);
 
   const handleMapClick = useCallback((event: mapboxgl.MapMouseEvent) => {
+    console.log('Map clicked!');
+    console.log('isAddingLocation:', isAddingLocation);
+    console.log('Click coordinates:', event.lngLat);
+
     if (!isAddingLocation) return;
 
     const newLocation = {
@@ -23,9 +27,20 @@ function MapComponent() {
       latitude: event.lngLat.lat
     };
 
-    setTheftLocations(prev => [...prev, newLocation]);
+    console.log('Adding new location:', newLocation);
+
+    setTheftLocations((prevLocations: TheftLocation[]) => {
+      console.log('Updated theft locations:', [...prevLocations, newLocation]);
+      return [...prevLocations, newLocation];
+    });
+
     setIsAddingLocation(false); // Exit adding mode after placing pin
   }, [isAddingLocation]);
+
+  const handleToolbarClick = () => {
+    console.log('Toolbar button clicked, setting isAddingLocation to true');
+    setIsAddingLocation(true);
+  };
 
   return (
       <Map
@@ -42,7 +57,7 @@ function MapComponent() {
         onClick={handleMapClick}
       >
         <LocationSearch />
-        <MapToolbar onAddLocation={() => setIsAddingLocation(true)} />
+        <MapToolbar onAddLocation={handleToolbarClick} />
         <NavigationControl position="bottom-right" />
       
         {theftLocations.map(location => (
@@ -50,6 +65,8 @@ function MapComponent() {
             key={location.id}
             longitude={location.longitude}
             latitude={location.latitude}
+            color="#FF0000" // Add bright red color
+            scale={1.5} // Make it a bit larger
           />
         ))}
     </Map>

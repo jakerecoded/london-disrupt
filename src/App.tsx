@@ -3,6 +3,7 @@ import Header from './components/Header';
 import Map from './components/Map';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 function App() {
   return (
