@@ -1,0 +1,19 @@
+{
+    "name": "London Disrupt Development",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+    "features": {},
+    "forwardPorts": [5173],
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "dbaeumer.vscode-eslint",
+          "esbenp.prettier-vscode",
+          "bradlc.vscode-tailwindcss",
+          "GitHub.copilot"
+        ]
+      }
+    },
+    "postCreateCommand": "npm install",
+    "remoteUser": "node"
+  }
+  
