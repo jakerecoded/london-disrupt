@@ -5,6 +5,8 @@ import MapToolbar from './MapToolbar';
 import LocationSearch from './LocationSearch';
 import { faExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { MapLayerMouseEvent } from 'mapbox-gl';
+import TheftDetailsDialog from './TheftDetailsDialog';
 
 interface TheftLocation {
   id: string;
@@ -19,11 +21,11 @@ interface TheftLocation {
 
 function MapComponent() {
   const [isAddingLocation, setIsAddingLocation] = useState(false);
-  const [theftLocations, setTheftLocations] = useState<any[]>([]);
+  const [theftLocations, setTheftLocations] = useState<TheftLocation[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [tempLocation, setTempLocation] = useState<{longitude: number; latitude: number} | null>(null);
 
-  const handleMapClick = useCallback((event: mapboxgl.MapMouseEvent) => {
+  const handleMapClick = useCallback((event: MapLayerMouseEvent) => {
     console.log('Map clicked!');
     console.log('isAddingLocation:', isAddingLocation);
     console.log('Click coordinates:', event.lngLat);
@@ -31,27 +33,32 @@ function MapComponent() {
     if (!isAddingLocation) return;
 
     const newLocation = {
-      id: uuidv4(),
       longitude: event.lngLat.lng,
       latitude: event.lngLat.lat
     };
 
-    console.log('Adding new location:', newLocation);
-
-    setTheftLocations((prevLocations: TheftLocation[]) => {
-      console.log('Updated theft locations:', [...prevLocations, newLocation]);
-      return [...prevLocations, newLocation];
-    });
-
-    setIsAddingLocation(false); // Exit adding mode after placing pin
+    setTempLocation(newLocation);
+    setDialogOpen(true);
+    setIsAddingLocation(false);
   }, [isAddingLocation]);
 
+    const handleTheftDetailsSubmit = (details: Partial<TheftLocation>) => { // We can type this properly later
+    const newTheft = {
+      id: uuidv4(),
+      ...details
+    } as TheftLocation;
+    
+    setTheftLocations(prev => [...prev, newTheft]);
+    setTempLocation(null);
+    };
+
+  // Your existing toolbar click handler
   const handleToolbarClick = () => {
-    console.log('Toolbar button clicked, setting isAddingLocation to true');
-    setIsAddingLocation(true);
+    setIsAddingLocation(!isAddingLocation);
   };
 
   return (
+    <>
       <Map
         id="mainMap"
         initialViewState={{
@@ -87,6 +94,20 @@ function MapComponent() {
           </Marker>
         ))}
     </Map>
+
+    {tempLocation && (
+        <TheftDetailsDialog
+          isOpen={dialogOpen}
+          onClose={() => {
+            setDialogOpen(false);
+            setTempLocation(null);
+          }}
+          onSubmit={handleTheftDetailsSubmit}
+          location={tempLocation}
+        />
+      )}
+
+    </>
   );
 }
 
