@@ -19,7 +19,9 @@ interface TheftLocation {
 
 function MapComponent() {
   const [isAddingLocation, setIsAddingLocation] = useState(false);
-  const [theftLocations, setTheftLocations] = useState<TheftLocation[]>([]);
+  const [theftLocations, setTheftLocations] = useState<any[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [tempLocation, setTempLocation] = useState<{longitude: number; latitude: number} | null>(null);
 
   const handleMapClick = useCallback((event: mapboxgl.MapMouseEvent) => {
     console.log('Map clicked!');
@@ -72,7 +74,7 @@ function MapComponent() {
             key={location.id}
             longitude={location.longitude}
             latitude={location.latitude}
-            scale={0.7} // Make it a bit larger
+            scale={0.7} 
           >
            <div className="relative">
             <div className="w-6 h-6 bg-red-700 rounded-full">
