@@ -1,15 +1,5 @@
 import { useState } from 'react';
-
-interface TheftLocation {
-  id: string;
-  longitude: number;
-  latitude: number;
-  date: string;
-  bikeDescription: string;
-  theftDescription?: string;
-  lockType?: string;
-  policeCaseNumber?: string;
-}
+import { TheftLocation } from '../types/theft';
 
 interface TheftDetailsDialogProps {
   isOpen: boolean;

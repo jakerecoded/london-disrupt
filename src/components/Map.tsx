@@ -7,17 +7,7 @@ import { faExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MapLayerMouseEvent } from 'mapbox-gl';
 import TheftDetailsDialog from './TheftDetailsDialog';
-
-interface TheftLocation {
-  id: string;
-  longitude: number;
-  latitude: number;
-  date: string;
-  bikeDescription: string;
-  theftDescription?: string;
-  lockType?: string;
-  policeCaseNumber?: string;
-}
+import { TheftLocation } from '../types/theft';
 
 function MapComponent() {
   const [isAddingLocation, setIsAddingLocation] = useState(false);
