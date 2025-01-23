@@ -6,7 +6,7 @@ function LocationSearch() {
 
   return (
     // Added positioning classes here
-    <div className="absolute top-4 left-4 w-72">
+    <div className="absolute top-4 right-4 w-72">
       {/* @ts-expect-error - SearchBox component typing needs to be resolved */}
       <SearchBox
         accessToken={import.meta.env.VITE_MAPBOX_TOKEN}

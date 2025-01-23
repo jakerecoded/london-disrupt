@@ -1,6 +1,7 @@
 import Map, { NavigationControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import LocationSearch from './LocationSearch';
+import MapToolbar from './MapToolbar';
 
 function MapComponent() {
   return (
@@ -16,7 +17,8 @@ function MapComponent() {
       style={{ width: '100%', height: 'calc(100vh - 64px)' }}
     >
       <LocationSearch />
-      <NavigationControl />
+      <MapToolbar />
+      <NavigationControl position="bottom-right" />
     </Map>
   );
 }
