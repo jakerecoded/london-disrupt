@@ -1,4 +1,3 @@
-// src/components/LocationSearch.tsx
 import { useMap } from 'react-map-gl';
 import { SearchBox } from '@mapbox/search-js-react';
 
@@ -6,7 +5,8 @@ function LocationSearch() {
   const { current: map } = useMap();
 
   return (
-    <div className="w-72">
+    // Added positioning classes here
+    <div className="absolute top-4 left-4 w-72">
       {/* @ts-expect-error - SearchBox component typing needs to be resolved */}
       <SearchBox
         accessToken={import.meta.env.VITE_MAPBOX_TOKEN}

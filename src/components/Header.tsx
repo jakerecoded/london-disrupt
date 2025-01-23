@@ -3,7 +3,6 @@ import AuthDialog from './AuthDialog';
 import { supabase } from '../lib/supabase';
 import { useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import LocationSearch from './LocationSearch';
 
 function Header() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -35,7 +34,6 @@ function Header() {
             <h1 className="text-xl font-bold">Phone Theft Tracker</h1>
           </div>
           <div className="flex items-center space-x-4">
-            {user && <LocationSearch />} {/* Only show search when logged in */}
             {user ? (
               <div className="flex items-center space-x-4">
                 <span className="text-gray-700">{user.email}</span>
