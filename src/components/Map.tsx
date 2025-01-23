@@ -1,17 +1,16 @@
 import { useState, useCallback } from 'react';
 import Map, { NavigationControl, Marker } from 'react-map-gl';
-import { v4 as uuidv4 } from 'uuid'; // We'll need to install this
 import MapToolbar from './MapToolbar';
 import LocationSearch from './LocationSearch';
 import { faExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MapLayerMouseEvent } from 'mapbox-gl';
 import TheftDetailsDialog from './TheftDetailsDialog';
-import { TheftLocation } from '../types/theft';
+import { InitialTheftReport, TheftMarker } from '../types/theft';
 
 function MapComponent() {
   const [isAddingLocation, setIsAddingLocation] = useState(false);
-  const [theftLocations, setTheftLocations] = useState<TheftLocation[]>([]);
+  const [theftLocations, setTheftLocations] = useState<TheftMarker[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [tempLocation, setTempLocation] = useState<{longitude: number; latitude: number} | null>(null);
 
@@ -32,17 +31,20 @@ function MapComponent() {
     setIsAddingLocation(false);
   }, [isAddingLocation]);
 
-    const handleTheftDetailsSubmit = (details: Partial<TheftLocation>) => { // We can type this properly later
-    const newTheft = {
-      id: uuidv4(),
-      ...details
-    } as TheftLocation;
-    
-    setTheftLocations(prev => [...prev, newTheft]);
-    setTempLocation(null);
+  const handleTheftDetailsSubmit = (details: InitialTheftReport) => {
+    // For now, create a temporary TheftMarker
+    // This will be replaced with actual Supabase data later
+    const newMarker: TheftMarker = {
+        id: String(Date.now()), // temporary ID until we integrate with Supabase
+        longitude: details.location.longitude,
+        latitude: details.location.latitude,
+        type: 'THEFT'
     };
+    
+    setTheftLocations(prev => [...prev, newMarker]);
+    setTempLocation(null);
+  };
 
-  // Your existing toolbar click handler
   const handleToolbarClick = () => {
     setIsAddingLocation(!isAddingLocation);
   };
@@ -66,11 +68,11 @@ function MapComponent() {
         <MapToolbar onAddLocation={handleToolbarClick} isAddingLocation={isAddingLocation} />
         <NavigationControl position="bottom-right" />
       
-        {theftLocations.map(location => (
+        {theftLocations.map(marker => (
           <Marker
-            key={location.id}
-            longitude={location.longitude}
-            latitude={location.latitude}
+            key={marker.id}
+            longitude={marker.longitude}
+            latitude={marker.latitude}
             scale={0.7} 
           >
            <div className="relative">
@@ -96,7 +98,6 @@ function MapComponent() {
           location={tempLocation}
         />
       )}
-
     </>
   );
 }

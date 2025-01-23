@@ -1,20 +1,35 @@
-import { useState } from 'react';
-import { TheftDetails } from '../types/theft';
+import { useState, useEffect } from 'react';
+import { InitialTheftReport } from '../types/theft';
 
 interface TheftDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (details: TheftDetails) => void;  // Removed Partial since we'll collect all fields
+  onSubmit: (details: InitialTheftReport) => void;
   location: {longitude: number; latitude: number};
 }
 
 const TheftDetailsDialog = ({ isOpen, onClose, onSubmit, location }: TheftDetailsDialogProps) => {
-  const [formData, setFormData] = useState<TheftDetails>({
+  const [formData, setFormData] = useState<InitialTheftReport>({
     timeOfTheft: '',
     phoneDetails: '',
     victimDetails: '',
-    reportedToPolice: false
+    reportedToPolice: false,
+    location: {
+      latitude: location.latitude,
+      longitude: location.longitude
+    }
   });
+
+  // Update formData location when location prop changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      location: {
+        latitude: location.latitude,
+        longitude: location.longitude
+      }
+    }));
+  }, [location]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +37,7 @@ const TheftDetailsDialog = ({ isOpen, onClose, onSubmit, location }: TheftDetail
     onClose();
   };
 
+  // Rest of the component remains the same
   return (
     <div className={`fixed inset-0 ${isOpen ? 'block' : 'hidden'}`}>
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
