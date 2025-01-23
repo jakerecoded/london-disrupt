@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   IconMap,
   IconLayersIntersect,
+  IconMapPin,
   IconSettings,
   IconInfoCircle,
   IconShare,
@@ -33,15 +34,26 @@ function ToolbarButton({ icon: Icon, label, active, onClick }: ToolbarButtonProp
 }
 
 const toolbarItems = [
-  { icon: IconMap, label: 'Base Map' },
+  { icon: IconMapPin, label: 'Add Theft Location' },
   { icon: IconLayersIntersect, label: 'Layers' },
   { icon: IconInfoCircle, label: 'Information' },
   { icon: IconShare, label: 'Share' },
   { icon: IconSettings, label: 'Settings' },
 ];
 
-function MapToolbar() {
-  const [active, setActive] = useState(0);
+interface MapToolbarProps {
+    onAddLocation: () => void;
+  }
+
+function MapToolbar({ onAddLocation }: MapToolbarProps) {
+  const [active, setActive] = useState<number | null>(null);
+
+  const handleClick = (index: number) => {
+    if (index === 0) {
+        onAddLocation();
+    }
+    setActive(index);
+  }
 
   return (
     <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col bg-white rounded-xl shadow-lg p-4">
@@ -50,7 +62,7 @@ function MapToolbar() {
           key={item.label}
           {...item}
           active={index === active}
-          onClick={() => setActive(index)}
+          onClick={() => handleClick(index)}
         />
       ))}
     </div>
