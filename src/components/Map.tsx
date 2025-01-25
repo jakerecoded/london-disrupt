@@ -50,6 +50,7 @@ function MapComponent() {
   }, [isAddingLocation]);
 
   const handleTheftDetailsSubmit = async (details: InitialTheftReport) => {
+    console.log('Received details:', details); // Check what data is coming in
     try {
       setIsLoading(true);
       const newMarker = await createTheftReport(details);

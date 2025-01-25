@@ -3,10 +3,26 @@ import { InitialTheftReport, TimelineMarker } from '../types/theft';
 
 export const createTheftReport = async (report: InitialTheftReport): Promise<TimelineMarker> => {
     try {
+        // Get the current user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+            throw new Error('No authenticated user');
+        }
+
+        console.log('Creating incident with data:', {
+            user_id: user.id,
+            reported_to_police: report.reportedToPolice,
+            time_of_theft: report.timeOfTheft,
+            phone_details: report.phoneDetails,
+            victim_details: report.victimDetails
+        });
+
         // First, create the incident record
         const { data: incident, error: incidentError } = await supabase
             .from('phone_theft_incidents')
             .insert({
+                user_id: user.id, // Add this line
                 reported_to_police: report.reportedToPolice,
                 time_of_theft: report.timeOfTheft,
                 phone_details: report.phoneDetails,
@@ -15,10 +31,15 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
             .select()
             .single();
 
-        if (incidentError) throw incidentError;
+        if (incidentError) {
+            console.error('Error creating incident:', incidentError);
+            throw incidentError;
+        }
+
+        console.log('Created incident:', incident);
 
         // Then create the initial timeline entry
-        const { error: timelineError } = await supabase
+        const { data: timeline, error: timelineError } = await supabase
             .from('phone_theft_timeline_entries')
             .insert({
                 incident_id: incident.id,
@@ -31,15 +52,19 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
             .select()
             .single();
 
-        if (timelineError) throw timelineError;
+        if (timelineError) {
+            console.error('Error creating timeline entry:', timelineError);
+            throw timelineError;
+        }
 
-        // Return format suitable for map marker
+        console.log('Created timeline entry:', timeline);
+
         return {
             id: incident.id,
             longitude: report.location.longitude,
             latitude: report.location.latitude,
             type: 'THEFT',
-            timestamp: report.timeOfTheft  // Added this line
+            timestamp: report.timeOfTheft
         };
     } catch (error) {
         console.error('Error creating theft report:', error);
