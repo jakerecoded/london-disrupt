@@ -44,9 +44,10 @@ const toolbarItems = [
 interface MapToolbarProps {
     onAddLocation: () => void;
     isAddingLocation: boolean;
+    hasActiveIncident?: boolean;
   }
 
-function MapToolbar({ onAddLocation, isAddingLocation }: MapToolbarProps) {
+function MapToolbar({ onAddLocation, isAddingLocation, hasActiveIncident }: MapToolbarProps) {
   const [active, setActive] = useState<number | null>(null);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ function MapToolbar({ onAddLocation, isAddingLocation }: MapToolbarProps) {
   }, [isAddingLocation]);
 
   const handleClick = (index: number) => {
-    if (index === 0) {
+    if (index === 0 && !hasActiveIncident) {
         onAddLocation();
     }
     setActive(index);

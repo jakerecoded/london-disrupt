@@ -37,9 +37,12 @@ export interface TimelineEntry {
 }
 
 // This is for displaying markers on the map
-export interface TheftMarker {
+export interface TimelineMarker {
   id: string;
   longitude: number;
   latitude: number;
-  type: TimelineEntry['type'];
+  type: 'THEFT' | 'MOVEMENT' | 'HOLDING' | 'FINAL';
+  duration_at_location?: string; // Optional as THEFT type won't have this
+  timestamp: string;
 }
+
