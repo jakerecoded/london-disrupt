@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
   IconMap,
-  IconLayersIntersect,
-  IconMapPin,
-  IconSettings,
-  IconInfoCircle,
-  IconShare,
 } from '@tabler/icons-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPersonFallingBurst, faRoute, faWarehouse, faSquarePlus, faUserNinja } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip } from '@mantine/core';
 
 interface ToolbarButtonProps {
@@ -22,23 +19,27 @@ function ToolbarButton({ icon: Icon, label, active, onClick }: ToolbarButtonProp
       <button
         onClick={onClick}
         className={`p-4 rounded-lg mb-4 transition-colors ${
-          active 
-            ? 'bg-blue-500 text-white' 
-            : 'bg-white text-gray-700 hover:bg-gray-100'
+          active ?
+            'bg-blue-500 text-white' :
+            'bg-white text-gray-700 hover:bg-gray-100'
         }`}
       >
-        <Icon size={32} stroke={1.5} />
+        {typeof Icon === 'object' ? (
+          <FontAwesomeIcon icon={Icon} size="2x" />
+        ) : (
+          <Icon size={32} stroke={1.5} />
+        )}
       </button>
     </Tooltip>
   );
 }
 
 const toolbarItems = [
-  { icon: IconMapPin, label: 'Add Theft Location' },
-  { icon: IconLayersIntersect, label: 'Layers' },
-  { icon: IconInfoCircle, label: 'Information' },
-  { icon: IconShare, label: 'Share' },
-  { icon: IconSettings, label: 'Settings' },
+  { icon: faPersonFallingBurst, label: 'Add Theft Location' },
+  { icon: faRoute, label: 'Add the route your phone took' },
+  { icon: faWarehouse, label: 'Add a location where your phone stopped' },
+  { icon: faUserNinja, label: 'Add some information about who attacked you' },
+  { icon: faSquarePlus, label: 'Start a different incident timeline' },
 ];
 
 interface MapToolbarProps {
