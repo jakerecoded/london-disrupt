@@ -308,7 +308,6 @@ function MapComponent() {
 
         <PathDrawer
           isActive={isDrawingPath}
-          markers={theftLocations}
           onPathComplete={handlePathComplete}
           onCancel={() => setIsDrawingPath(false)}
         />
