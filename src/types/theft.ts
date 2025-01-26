@@ -32,7 +32,7 @@ export interface TimelineEntry {
   longitude: number;
   timestamp: string;
   duration_at_location?: string; // for INTERVAL
-  type: 'THEFT' | 'MOVEMENT' | 'HOLDING' | 'FINAL';
+  type: 'THEFT' | 'MOVEMENT' | 'HOLDING' | 'FINAL' | 'PATH';
   entry_order: number;
 }
 
