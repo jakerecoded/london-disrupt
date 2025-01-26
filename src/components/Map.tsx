@@ -1,14 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import Map, { NavigationControl, Marker, MapRef, Source, Layer } from 'react-map-gl';
+import Map, { NavigationControl, MapRef, Source, Layer } from 'react-map-gl';
 import MapToolbar from './MapToolbar';
 import LocationSearch from './LocationSearch';
-import { faCircle, faPersonFallingBurst, faWarehouse, faPhoneSlash } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import MapMarker from './MapMarker';
 import { MapLayerMouseEvent } from 'mapbox-gl';
 import TheftDetailsDialog from './TheftDetailsDialog';
 import StopLocationDialog from './StopLocationDialog';
 import FinalLocationDialog from './FinalLocationDialog';
-import { InitialTheftReport, TimelineMarker, PathPoint, TimelineEntryType } from '../types/theft';
+import { InitialTheftReport, TimelineMarker, PathPoint } from '../types/theft';
 import { createTheftReport, loadFullTimeline, createStopLocationEntry, createFinalLocationEntry } from '../services/theftService';
 import { supabase } from '../lib/supabase';
 import PathDrawer from './PathDrawer';
@@ -32,6 +31,8 @@ function MapComponent() {
   const [tempLocation, setTempLocation] = useState<{longitude: number; latitude: number} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasTheftLocation, setHasTheftLocation] = useState(false);
+  const [hasFinalLocation, setHasFinalLocation] = useState(false);
 
   useEffect(() => {
     const loadUserIncidents = async () => {
@@ -106,6 +107,12 @@ function MapComponent() {
 
     loadTimeline();
   }, [currentIncidentId]);
+
+  // Update location states whenever timeline changes
+  useEffect(() => {
+    setHasTheftLocation(theftLocations.some(marker => marker.type === 'THEFT'));
+    setHasFinalLocation(theftLocations.some(marker => marker.type === 'FINAL'));
+  }, [theftLocations]);
 
   const handleMapClick = useCallback((event: MapLayerMouseEvent) => {
     if (isAddingLocation) {
@@ -292,36 +299,6 @@ function MapComponent() {
     }
   };
 
-  const getMarkerStyle = (type: TimelineEntryType) => {
-    switch (type) {
-      case 'THEFT':
-        return {
-          icon: faPersonFallingBurst,
-          bgColor: 'bg-red-700',
-        };
-      case 'MOVEMENT':
-        return {
-          icon: faCircle,
-          bgColor: 'bg-blue-500',
-        };
-      case 'HOLDING':
-        return {
-          icon: faWarehouse,
-          bgColor: 'bg-yellow-500',
-        };
-      case 'FINAL':
-        return {
-          icon: faPhoneSlash,
-          bgColor: 'bg-green-700',
-        };
-      case 'PATH':
-        return {
-          icon: faCircle,
-          bgColor: 'bg-blue-300',
-        };
-    }
-  };
-
   const handleToolbarClick = (index: number) => {
     console.log('Toolbar clicked with index:', index);
     if (index === -1) {
@@ -411,16 +388,16 @@ function MapComponent() {
           hasActiveIncident={!!currentIncidentId}
           onStartPathDrawing={() => setIsDrawingPath(!isDrawingPath)}
           onAddFinalLocation={() => setIsAddingFinalLocation(!isAddingFinalLocation)}
+          hasTheftLocation={hasTheftLocation}
+          hasFinalLocation={hasFinalLocation}
         />
         <NavigationControl position="bottom-right" />
 
-        {/* Path lines */}
+        {/* 1. Render path lines (bottom layer) */}
         {(() => {
           const pathPoints = theftLocations.filter(m => m.type === 'PATH');
-          console.log('Path points:', pathPoints);
           if (pathPoints.length > 1) {
             const coordinates = pathPoints.map(p => [p.longitude, p.latitude]);
-            console.log('Path coordinates:', coordinates);
             return (
               <Source
                 type="geojson"
@@ -437,9 +414,11 @@ function MapComponent() {
                 <Layer
                   id="path-line-background"
                   type="line"
+                  beforeId="road-label"  // Add before road labels
                   layout={{
                     'line-join': 'round',
-                    'line-cap': 'round'
+                    'line-cap': 'round',
+                    'visibility': 'visible'
                   }}
                   paint={{
                     'line-color': '#4a90e2',
@@ -451,9 +430,11 @@ function MapComponent() {
                 <Layer
                   id="path-line-dashed"
                   type="line"
+                  beforeId="road-label"  // Add before road labels
                   layout={{
                     'line-join': 'round',
-                    'line-cap': 'round'
+                    'line-cap': 'round',
+                    'visibility': 'visible'
                   }}
                   paint={{
                     'line-color': '#4a90e2',
@@ -467,55 +448,37 @@ function MapComponent() {
           return null;
         })()}
 
-        {/* Render path points first (underneath) */}
+        {/* 2. Render path markers (middle layer) */}
         {theftLocations
           .filter(marker => marker.type === 'PATH')
           .map(marker => (
-            <Marker
-            key={marker.id}
-            longitude={marker.longitude}
-            latitude={marker.latitude}
-            scale={0.5}
-          >
-            <div className="w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm" />
-          </Marker>
+            <MapMarker
+              key={marker.id}
+              marker={marker}
+              onClick={() => {
+                if (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.()) {
+                  window.pathDrawerMethods.handleStartMarkerSelect?.(marker);
+                }
+              }}
+              onDelete={() => {/* TODO: Implement delete */}}
+            />
           ))}
 
-        {/* Render all other markers on top */}
+        {/* 3. Render other markers (top layer) */}
         {theftLocations
           .filter(marker => marker.type !== 'PATH')
-          .map(marker => {
-            const style = getMarkerStyle(marker.type);
-            return (
-              <Marker
-                key={marker.id}
-                longitude={marker.longitude}
-                latitude={marker.latitude}
-                scale={1.05}
-                onClick={() => {
-                  if (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.()) {
-                    window.pathDrawerMethods.handleStartMarkerSelect?.(marker);
-                  }
-                }}
-              >
-                <div className="relative group">
-                  <div className={`w-9 h-9 ${style.bgColor} rounded-full`}>
-                    <FontAwesomeIcon 
-                      icon={style.icon} 
-                      className="text-white text-base absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                    />
-                  </div>
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white p-2 rounded shadow-lg text-xs z-50">
-                    <p>Type: {marker.type}</p>
-                    <p>Time: {new Date(marker.timestamp).toLocaleString()}</p>
-                    {marker.duration_at_location && (
-                      <p>Duration: {marker.duration_at_location}</p>
-                    )}
-                  </div>
-                </div>
-              </Marker>
-            );
-          })}
+          .map(marker => (
+            <MapMarker
+              key={marker.id}
+              marker={marker}
+              onClick={() => {
+                if (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.()) {
+                  window.pathDrawerMethods.handleStartMarkerSelect?.(marker);
+                }
+              }}
+              onDelete={() => {/* TODO: Implement delete */}}
+            />
+          ))}
 
         <PathDrawer
           isActive={isDrawingPath}

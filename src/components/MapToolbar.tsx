@@ -10,18 +10,21 @@ interface ToolbarButtonProps {
   icon: typeof IconMap | IconDefinition;
   label: string;
   active?: boolean;
+  disabled?: boolean;
   onClick?: () => void;
 }
 
-function ToolbarButton({ icon: Icon, label, active, onClick }: ToolbarButtonProps) {
+function ToolbarButton({ icon: Icon, label, active, disabled, onClick }: ToolbarButtonProps) {
   return (
-    <Tooltip label={label} position="left">
+    <Tooltip label={disabled ? `Cannot ${label.toLowerCase()} - already exists` : label} position="left">
       <button
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
         className={`p-4 rounded-lg mb-4 transition-colors ${
           active ?
             'bg-blue-500 text-white' :
-            'bg-white text-gray-700 hover:bg-gray-100'
+            disabled ?
+              'bg-gray-200 text-gray-400 cursor-not-allowed' :
+              'bg-white text-gray-700 hover:bg-gray-100'
         }`}
       >
         {typeof Icon === 'object' ? (
@@ -49,9 +52,19 @@ interface MapToolbarProps {
   hasActiveIncident?: boolean;
   onStartPathDrawing: () => void;
   onAddFinalLocation?: () => void;
+  hasTheftLocation?: boolean;
+  hasFinalLocation?: boolean;
 }
 
-function MapToolbar({ onAddLocation, isAddingLocation, hasActiveIncident, onStartPathDrawing, onAddFinalLocation }: MapToolbarProps) {
+function MapToolbar({ 
+  onAddLocation, 
+  isAddingLocation, 
+  hasActiveIncident, 
+  onStartPathDrawing, 
+  onAddFinalLocation,
+  hasTheftLocation,
+  hasFinalLocation 
+}: MapToolbarProps) {
   const [active, setActive] = useState<number | null>(null);
 
   useEffect(() => {
@@ -110,6 +123,10 @@ function MapToolbar({ onAddLocation, isAddingLocation, hasActiveIncident, onStar
           key={item.label}
           {...item}
           active={index === active}
+          disabled={
+            (index === 0 && hasTheftLocation) || // Theft Location button
+            (index === 3 && hasFinalLocation)    // Final Location button
+          }
           onClick={() => handleClick(index)}
         />
       ))}

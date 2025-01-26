@@ -1,4 +1,4 @@
-unfu#root {
+#root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -69,4 +69,25 @@ unfu#root {
   animation: flowingDash 1.5s linear infinite;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* Popup transition styles */
+.mapboxgl-popup {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.mapboxgl-popup-content {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.mapboxgl-popup.visible {
+  opacity: 1;
+}
+
+.mapboxgl-popup.visible .mapboxgl-popup-content {
+  opacity: 1;
+  transform: translateY(0);
 }
