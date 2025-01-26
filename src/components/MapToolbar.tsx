@@ -4,10 +4,11 @@ import {
 } from '@tabler/icons-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPersonFallingBurst, faRoute, faWarehouse, faSquarePlus, faUserNinja } from '@fortawesome/free-solid-svg-icons';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { Tooltip } from '@mantine/core';
 
 interface ToolbarButtonProps {
-  icon: typeof IconMap;
+  icon: typeof IconMap | IconDefinition;
   label: string;
   active?: boolean;
   onClick?: () => void;
