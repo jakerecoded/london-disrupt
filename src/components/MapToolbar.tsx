@@ -1,7 +1,6 @@
+// components/MapToolbar.tsx
 import { useState, useEffect } from 'react';
-import {
-  IconMap,
-} from '@tabler/icons-react';
+import { IconMap } from '@tabler/icons-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPersonFallingBurst, faRoute, faWarehouse, faSquarePlus, faUserNinja } from '@fortawesome/free-solid-svg-icons';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -44,12 +43,13 @@ const toolbarItems = [
 ];
 
 interface MapToolbarProps {
-    onAddLocation: () => void;
-    isAddingLocation: boolean;
-    hasActiveIncident?: boolean;
-  }
+  onAddLocation: () => void;
+  isAddingLocation: boolean;
+  hasActiveIncident?: boolean;
+  onStartPathDrawing: () => void;
+}
 
-function MapToolbar({ onAddLocation, isAddingLocation, hasActiveIncident }: MapToolbarProps) {
+function MapToolbar({ onAddLocation, isAddingLocation, hasActiveIncident, onStartPathDrawing }: MapToolbarProps) {
   const [active, setActive] = useState<number | null>(null);
 
   useEffect(() => {
@@ -60,10 +60,14 @@ function MapToolbar({ onAddLocation, isAddingLocation, hasActiveIncident }: MapT
 
   const handleClick = (index: number) => {
     if (index === 0 && !hasActiveIncident) {
-        onAddLocation();
+      // Handle theft location button
+      onAddLocation();
+    } else if (index === 1 && hasActiveIncident) {
+      // Handle route button
+      onStartPathDrawing();
     }
     setActive(index);
-  }
+  };
 
   return (
     <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col bg-white rounded-xl shadow-lg p-4">

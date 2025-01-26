@@ -6,18 +6,20 @@ import { faCircle, faFlag, faPersonFallingBurst } from '@fortawesome/free-solid-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MapLayerMouseEvent } from 'mapbox-gl';
 import TheftDetailsDialog from './TheftDetailsDialog';
-import { InitialTheftReport, TimelineMarker } from '../types/theft';
+import { InitialTheftReport, TimelineMarker, PathPoint, TimelineEntryType } from '../types/theft';
 import { createTheftReport, loadFullTimeline } from '../services/theftService';
 import { supabase } from '../lib/supabase';
+import PathDrawer from './PathDrawer';
 
 function MapComponent() {
   const mapRef = useRef<MapRef>(null);
   const [viewState, setViewState] = useState({
-    longitude: -0.1276, // Default London coordinates
+    longitude: -0.1276,
     latitude: 51.5072,
     zoom: 12
   });
   const [isAddingLocation, setIsAddingLocation] = useState(false);
+  const [isDrawingPath, setIsDrawingPath] = useState(false);
   const [theftLocations, setTheftLocations] = useState<TimelineMarker[]>([]);
   const [currentIncidentId, setCurrentIncidentId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -25,7 +27,6 @@ function MapComponent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial data loading - check for user and their most recent incident
   useEffect(() => {
     const loadUserIncidents = async () => {
       try {
@@ -48,7 +49,6 @@ function MapComponent() {
 
         console.log('User authenticated:', user.id);
 
-        // Get user's most recent incident
         const { data: incidents, error: incidentsError } = await supabase
           .from('phone_theft_incidents')
           .select('id, created_at')
@@ -78,9 +78,8 @@ function MapComponent() {
     };
 
     loadUserIncidents();
-  }, []); // Run once on component mount
+  }, []);
 
-  // Load timeline when currentIncidentId changes
   useEffect(() => {
     const loadTimeline = async () => {
       if (!currentIncidentId) {
@@ -96,7 +95,6 @@ function MapComponent() {
         console.log('Loaded timeline data:', timeline);
         
         if (timeline.length > 0) {
-          // Get the initial theft location (first point in timeline)
           const initialTheft = timeline.find(marker => marker.type === 'THEFT');
           
           if (initialTheft) {
@@ -104,14 +102,13 @@ function MapComponent() {
             setViewState({
               longitude: initialTheft.longitude,
               latitude: initialTheft.latitude,
-              zoom: 14 // You can adjust this zoom level
+              zoom: 14
             });
             
-            // Smoothly animate to the location
             mapRef.current?.flyTo({
               center: [initialTheft.longitude, initialTheft.latitude],
               zoom: 14,
-              duration: 2000 // Animation duration in milliseconds
+              duration: 2000
             });
           }
         }
@@ -129,19 +126,60 @@ function MapComponent() {
   }, [currentIncidentId]);
 
   const handleMapClick = useCallback((event: MapLayerMouseEvent) => {
-    if (!isAddingLocation) return;
+    if (isAddingLocation) {
+      console.log('Map clicked at:', event.lngLat);
+      
+      const newLocation = {
+        longitude: event.lngLat.lng,
+        latitude: event.lngLat.lat
+      };
 
-    console.log('Map clicked at:', event.lngLat);
-    
-    const newLocation = {
-      longitude: event.lngLat.lng,
-      latitude: event.lngLat.lat
-    };
+      setTempLocation(newLocation);
+      setDialogOpen(true);
+      setIsAddingLocation(false);
+      return;
+    }
 
-    setTempLocation(newLocation);
-    setDialogOpen(true);
-    setIsAddingLocation(false);
-  }, [isAddingLocation]);
+    if (isDrawingPath && window.pathDrawerMethods?.addPathPoint) {
+      const isSelecting = window.pathDrawerMethods.isSelectingStart();
+      
+      if (!isSelecting) {
+        window.pathDrawerMethods.addPathPoint(event.lngLat.lat, event.lngLat.lng);
+      }
+    }
+  }, [isAddingLocation, isDrawingPath]);
+
+  const handlePathComplete = async (points: PathPoint[]) => {
+    try {
+      setIsLoading(true);
+      
+      const { error } = await supabase
+        .from('phone_theft_timeline_entries')
+        .insert(
+          points.map(point => ({
+            incident_id: currentIncidentId,
+            latitude: point.latitude,
+            longitude: point.longitude,
+            timestamp: new Date().toISOString(),
+            type: 'PATH',
+            entry_order: point.entry_order
+          }))
+        )
+        .select();
+
+      if (error) throw error;
+
+      const timeline = await loadFullTimeline(currentIncidentId!);
+      setTheftLocations(timeline);
+      
+    } catch (error) {
+      console.error('Failed to save path:', error);
+      setError('Failed to save path');
+    } finally {
+      setIsLoading(false);
+      setIsDrawingPath(false);
+    }
+  };
 
   const handleTheftDetailsSubmit = async (details: InitialTheftReport) => {
     console.log('Submitting theft details:', details);
@@ -157,7 +195,6 @@ function MapComponent() {
       setTheftLocations([newMarker]);
       setDialogOpen(false);
 
-      // Center map on new theft location
       setViewState({
         longitude: newMarker.longitude,
         latitude: newMarker.latitude,
@@ -178,7 +215,7 @@ function MapComponent() {
     }
   };
 
-  const getMarkerStyle = (type: TimelineMarker['type']) => {
+  const getMarkerStyle = (type: TimelineEntryType) => {
     switch (type) {
       case 'THEFT':
         return {
@@ -200,6 +237,11 @@ function MapComponent() {
           icon: faFlag,
           bgColor: 'bg-green-700',
         };
+      case 'PATH':
+        return {
+          icon: faCircle,
+          bgColor: 'bg-blue-300',
+        };
     }
   };
 
@@ -218,7 +260,7 @@ function MapComponent() {
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
-        cursor={isAddingLocation ? 'crosshair' : 'grab'}
+        cursor={isAddingLocation || (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.() === false) ? 'crosshair' : 'grab'}
         onClick={handleMapClick}
       >
         <LocationSearch />
@@ -226,6 +268,7 @@ function MapComponent() {
           onAddLocation={handleToolbarClick} 
           isAddingLocation={isAddingLocation}
           hasActiveIncident={!!currentIncidentId}
+          onStartPathDrawing={() => setIsDrawingPath(true)}
         />
         <NavigationControl position="bottom-right" />
       
@@ -237,7 +280,12 @@ function MapComponent() {
               key={marker.id}
               longitude={marker.longitude}
               latitude={marker.latitude}
-              scale={0.7} 
+              scale={0.7}
+              onClick={() => {
+                if (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.()) {
+                  window.pathDrawerMethods.handleStartMarkerSelect?.(marker);
+                }
+              }}
             >
              <div className="relative group">
               <div className={`w-6 h-6 ${style.bgColor} rounded-full`}>
@@ -246,7 +294,6 @@ function MapComponent() {
                   className="text-white text-sm absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
                 />
               </div>
-              {/* Tooltip */}
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white p-2 rounded shadow-lg text-xs">
                 <p>Type: {marker.type}</p>
                 <p>Time: {new Date(marker.timestamp).toLocaleString()}</p>
@@ -259,7 +306,13 @@ function MapComponent() {
           );
         })}
 
-        {/* Loading overlay */}
+        <PathDrawer
+          isActive={isDrawingPath}
+          markers={theftLocations}
+          onPathComplete={handlePathComplete}
+          onCancel={() => setIsDrawingPath(false)}
+        />
+
         {isLoading && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-lg">
@@ -268,7 +321,6 @@ function MapComponent() {
           </div>
         )}
 
-        {/* Error message */}
         {error && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
             {error}

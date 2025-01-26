@@ -1,5 +1,7 @@
 // types/theft.ts
 
+export type TimelineEntryType = 'THEFT' | 'MOVEMENT' | 'HOLDING' | 'FINAL' | 'PATH';
+
 // This represents the initial theft report form data
 export interface InitialTheftReport {
   timeOfTheft: string;
@@ -7,8 +9,8 @@ export interface InitialTheftReport {
   victimDetails: string;
   reportedToPolice: boolean;
   location: {
-      latitude: number;
-      longitude: number;
+    latitude: number;
+    longitude: number;
   };
 }
 
@@ -32,7 +34,7 @@ export interface TimelineEntry {
   longitude: number;
   timestamp: string;
   duration_at_location?: string; // for INTERVAL
-  type: 'THEFT' | 'MOVEMENT' | 'HOLDING' | 'FINAL' | 'PATH';
+  type: TimelineEntryType;
   entry_order: number;
 }
 
@@ -41,8 +43,26 @@ export interface TimelineMarker {
   id: string;
   longitude: number;
   latitude: number;
-  type: 'THEFT' | 'MOVEMENT' | 'HOLDING' | 'FINAL';
-  duration_at_location?: string; // Optional as THEFT type won't have this
+  type: TimelineEntryType;
+  duration_at_location?: string;
   timestamp: string;
+  entry_order: number;
 }
 
+// This is for path drawing
+export interface PathPoint {
+  latitude: number;
+  longitude: number;
+  entry_order: number;
+}
+
+// Declare global window interface to handle PathDrawer methods
+declare global {
+  interface Window {
+    pathDrawerMethods?: {
+      addPathPoint: (lat: number, lng: number) => void;
+      handleStartMarkerSelect: (marker: TimelineMarker) => void;
+      isSelectingStart: () => boolean;
+    };
+  }
+}

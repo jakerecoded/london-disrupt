@@ -3,7 +3,6 @@ import { InitialTheftReport, TimelineMarker } from '../types/theft';
 
 export const createTheftReport = async (report: InitialTheftReport): Promise<TimelineMarker> => {
     try {
-        // Get the current user
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
@@ -22,7 +21,7 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
         const { data: incident, error: incidentError } = await supabase
             .from('phone_theft_incidents')
             .insert({
-                user_id: user.id, // Add this line
+                user_id: user.id,
                 reported_to_police: report.reportedToPolice,
                 time_of_theft: report.timeOfTheft,
                 phone_details: report.phoneDetails,
@@ -64,14 +63,14 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
             longitude: report.location.longitude,
             latitude: report.location.latitude,
             type: 'THEFT',
-            timestamp: report.timeOfTheft
+            timestamp: report.timeOfTheft,
+            entry_order: 1  // Added this line
         };
     } catch (error) {
         console.error('Error creating theft report:', error);
         throw error;
     }
 };
-
 
 export const loadInitialTheftMarker = async (incident_id: string): Promise<TimelineMarker> => {
     try {
@@ -83,8 +82,9 @@ export const loadInitialTheftMarker = async (incident_id: string): Promise<Timel
                 latitude,
                 longitude,
                 type,
-                timestamp
-            `)
+                timestamp,
+                entry_order
+            `)  // Added entry_order to select
             .eq('incident_id', incident_id)
             .eq('type', 'THEFT')
             .single();
@@ -96,7 +96,8 @@ export const loadInitialTheftMarker = async (incident_id: string): Promise<Timel
             latitude: data.latitude,
             longitude: data.longitude,
             type: data.type,
-            timestamp: data.timestamp
+            timestamp: data.timestamp,
+            entry_order: data.entry_order  // Added this line
         };
     } catch (error) {
         console.error('Error loading initial theft marker:', error);
@@ -115,8 +116,9 @@ export const loadFullTimeline = async (incident_id: string): Promise<TimelineMar
                 longitude,
                 type,
                 duration_at_location,
-                timestamp
-            `)
+                timestamp,
+                entry_order
+            `)  // Added entry_order to select
             .eq('incident_id', incident_id)
             .order('entry_order', { ascending: true });
 
@@ -128,7 +130,8 @@ export const loadFullTimeline = async (incident_id: string): Promise<TimelineMar
             longitude: entry.longitude,
             type: entry.type,
             duration_at_location: entry.duration_at_location,
-            timestamp: entry.timestamp
+            timestamp: entry.timestamp,
+            entry_order: entry.entry_order  // Added this line
         }));
     } catch (error) {
         console.error('Error loading timeline:', error);
