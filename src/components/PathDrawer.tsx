@@ -11,7 +11,6 @@ interface PathDrawerProps {
 }
 
 export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathDrawerProps) {
-  const [selectedStartMarker, setSelectedStartMarker] = useState<TimelineMarker | null>(null);
   const [points, setPoints] = useState<PathPoint[]>([]);
   const [isSelectingStart, setIsSelectingStart] = useState(true);
   const [lastEntryOrder, setLastEntryOrder] = useState<number | null>(null);
@@ -32,7 +31,6 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
 
   const resetState = useCallback(() => {
     setPoints([]);
-    setSelectedStartMarker(null);
     setIsSelectingStart(true);
     setLastEntryOrder(null);
     stateRef.current = {
@@ -98,7 +96,6 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
         const nextEntryOrder = data?.[0]?.entry_order ? data[0].entry_order + 1 : 1;
         setLastEntryOrder(nextEntryOrder);
         
-        setSelectedStartMarker(marker);
         setIsSelectingStart(false);
         setPoints([{
           latitude: marker.latitude,
@@ -144,7 +141,7 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
             paint={{
               'line-color': '#4a90e2',
               'line-width': 3,
-              'line-dasharray': [2, 1]
+              'line-dasharray': [3, 3]
             }}
           />
         </Source>

@@ -1,4 +1,4 @@
-#root {
+unfu#root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -39,4 +39,34 @@
 
 .read-the-docs {
   color: #888;
+}
+
+@keyframes dash-animation {
+  to {
+    stroke-dashoffset: 20;
+  }
+}
+
+.animated-path {
+  stroke-dasharray: 4, 2;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 6;
+  }
+}
+
+@keyframes flowingDash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.flowing-path {
+  stroke-dasharray: 4 4;
+  animation: flowingDash 1.5s linear infinite;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

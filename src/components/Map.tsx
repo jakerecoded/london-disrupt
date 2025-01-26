@@ -2,12 +2,14 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import Map, { NavigationControl, Marker, MapRef, Source, Layer } from 'react-map-gl';
 import MapToolbar from './MapToolbar';
 import LocationSearch from './LocationSearch';
-import { faCircle, faFlag, faPersonFallingBurst } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faPersonFallingBurst, faWarehouse, faPhoneSlash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MapLayerMouseEvent } from 'mapbox-gl';
 import TheftDetailsDialog from './TheftDetailsDialog';
+import StopLocationDialog from './StopLocationDialog';
+import FinalLocationDialog from './FinalLocationDialog';
 import { InitialTheftReport, TimelineMarker, PathPoint, TimelineEntryType } from '../types/theft';
-import { createTheftReport, loadFullTimeline } from '../services/theftService';
+import { createTheftReport, loadFullTimeline, createStopLocationEntry, createFinalLocationEntry } from '../services/theftService';
 import { supabase } from '../lib/supabase';
 import PathDrawer from './PathDrawer';
 
@@ -19,10 +21,14 @@ function MapComponent() {
     zoom: 12
   });
   const [isAddingLocation, setIsAddingLocation] = useState(false);
+  const [isAddingStopLocation, setIsAddingStopLocation] = useState(false);
+  const [isAddingFinalLocation, setIsAddingFinalLocation] = useState(false);
   const [isDrawingPath, setIsDrawingPath] = useState(false);
   const [theftLocations, setTheftLocations] = useState<TimelineMarker[]>([]);
   const [currentIncidentId, setCurrentIncidentId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isStopLocationDialogOpen, setIsStopLocationDialogOpen] = useState(false);
+  const [isFinalLocationDialogOpen, setIsFinalLocationDialogOpen] = useState(false);
   const [tempLocation, setTempLocation] = useState<{longitude: number; latitude: number} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,36 +37,13 @@ function MapComponent() {
     const loadUserIncidents = async () => {
       try {
         setIsLoading(true);
-        console.log('Checking for authenticated user...');
-        
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        
-        if (authError) {
-          console.error('Auth error:', authError);
-          setError('Authentication failed');
-          return;
-        }
-
-        if (!user) {
-          console.log('No authenticated user found');
-          setError('No authenticated user');
-          return;
-        }
-
-        console.log('User authenticated:', user.id);
-
-        const { data: incidents, error: incidentsError } = await supabase
+        const { data: incidents, error } = await supabase
           .from('phone_theft_incidents')
-          .select('id, created_at')
-          .eq('user_id', user.id)
+          .select('*')
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (incidentsError) {
-          console.error('Error fetching incidents:', incidentsError);
-          setError('Failed to fetch incidents');
-          return;
-        }
+        if (error) throw error;
 
         if (incidents && incidents.length > 0) {
           console.log('Found most recent incident:', incidents[0]);
@@ -68,7 +51,6 @@ function MapComponent() {
         } else {
           console.log('No existing incidents found for user');
         }
-
       } catch (error) {
         console.error('Error in loadUserIncidents:', error);
         setError('Failed to load user data');
@@ -140,6 +122,34 @@ function MapComponent() {
       return;
     }
 
+    if (isAddingStopLocation) {
+      console.log('Adding stop location at:', event.lngLat);
+      
+      const newLocation = {
+        longitude: event.lngLat.lng,
+        latitude: event.lngLat.lat
+      };
+
+      setTempLocation(newLocation);
+      setIsStopLocationDialogOpen(true);
+      setIsAddingStopLocation(false);
+      return;
+    }
+
+    if (isAddingFinalLocation) {
+      console.log('Adding final location at:', event.lngLat);
+      
+      const newLocation = {
+        longitude: event.lngLat.lng,
+        latitude: event.lngLat.lat
+      };
+
+      setTempLocation(newLocation);
+      setIsFinalLocationDialogOpen(true);
+      setIsAddingFinalLocation(false);
+      return;
+    }
+
     if (isDrawingPath && window.pathDrawerMethods?.addPathPoint) {
       const isSelecting = window.pathDrawerMethods.isSelectingStart();
       
@@ -147,7 +157,7 @@ function MapComponent() {
         window.pathDrawerMethods.addPathPoint(event.lngLat.lat, event.lngLat.lng);
       }
     }
-  }, [isAddingLocation, isDrawingPath]);
+  }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath]);
 
   const handlePathComplete = async (points: PathPoint[]) => {
     try {
@@ -219,6 +229,69 @@ function MapComponent() {
     }
   };
 
+  const handleStopLocationSubmit = async (details: {
+    timestamp: string;
+    duration: string;
+    location: { longitude: number; latitude: number };
+  }) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      if (!currentIncidentId) {
+        throw new Error('No active incident');
+      }
+
+      await createStopLocationEntry({
+        ...details,
+        incident_id: currentIncidentId
+      });
+
+      // Refresh timeline
+      const timeline = await loadFullTimeline(currentIncidentId);
+      setTheftLocations(timeline);
+      setIsStopLocationDialogOpen(false);
+
+    } catch (error) {
+      console.error('Failed to create stop location:', error);
+      setError('Failed to create stop location');
+    } finally {
+      setIsLoading(false);
+      setTempLocation(null);
+    }
+  };
+
+  const handleFinalLocationSubmit = async (details: {
+    timestamp: string;
+    location: { longitude: number; latitude: number };
+  }) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      if (!currentIncidentId) {
+        throw new Error('No active incident');
+      }
+
+      await createFinalLocationEntry({
+        ...details,
+        incident_id: currentIncidentId
+      });
+
+      // Refresh timeline
+      const timeline = await loadFullTimeline(currentIncidentId);
+      setTheftLocations(timeline);
+      setIsFinalLocationDialogOpen(false);
+
+    } catch (error) {
+      console.error('Failed to create final location:', error);
+      setError('Failed to create final location');
+    } finally {
+      setIsLoading(false);
+      setTempLocation(null);
+    }
+  };
+
   const getMarkerStyle = (type: TimelineEntryType) => {
     switch (type) {
       case 'THEFT':
@@ -233,12 +306,12 @@ function MapComponent() {
         };
       case 'HOLDING':
         return {
-          icon: faCircle,
+          icon: faWarehouse,
           bgColor: 'bg-yellow-500',
         };
       case 'FINAL':
         return {
-          icon: faFlag,
+          icon: faPhoneSlash,
           bgColor: 'bg-green-700',
         };
       case 'PATH':
@@ -249,10 +322,62 @@ function MapComponent() {
     }
   };
 
-  const handleToolbarClick = () => {
-    console.log('Toolbar clicked, toggling location add mode');
-    setIsAddingLocation(!isAddingLocation);
+  const handleToolbarClick = (index: number) => {
+    console.log('Toolbar clicked with index:', index);
+    if (index === 0) {
+      setIsAddingLocation(!isAddingLocation);
+    } else if (index === 2) {
+      setIsAddingStopLocation(!isAddingStopLocation);
+    }
   };
+
+  // Animation setup for path lines
+  useEffect(() => {
+    const dashArraySequence = [
+      [0, 4, 3],
+      [1, 4, 2],
+      [2, 4, 1],
+      [3, 4, 0],
+      [0, 1, 3, 3],
+      [0, 2, 3, 2],
+      [0, 3, 3, 1]
+    ];
+
+    let step = 0;
+    let animationTimer: number;
+
+    const animate = () => {
+      if (!mapRef.current) return;
+      step = (step + 1) % dashArraySequence.length;
+      mapRef.current.getMap().setPaintProperty(
+        'path-line-dashed',
+        'line-dasharray',
+        dashArraySequence[step]
+      );
+      animationTimer = window.setTimeout(animate, 100);
+    };
+
+    // Start animation if we have path points
+    const pathPoints = theftLocations.filter(m => m.type === 'PATH');
+    if (pathPoints.length > 1) {
+      animate();
+    }
+
+    return () => {
+      if (animationTimer) {
+        clearTimeout(animationTimer);
+      }
+    };
+  }, [theftLocations]);
+
+  // Update path when map moves
+  useEffect(() => {
+    const pathPoints = theftLocations.filter(m => m.type === 'PATH');
+    if (pathPoints.length > 1 && mapRef.current) {
+      // Force re-render of SVG path
+      setViewState(prev => ({...prev}));
+    }
+  }, [viewState.longitude, viewState.latitude, viewState.zoom, theftLocations]);
 
   return (
     <>
@@ -264,22 +389,31 @@ function MapComponent() {
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
         style={{ width: '100%', height: '100%' }}
-        cursor={isAddingLocation || (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.() === false) ? 'crosshair' : 'grab'}
+        cursor={
+          isAddingLocation || isAddingStopLocation || isAddingFinalLocation || 
+          (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.() === false) 
+            ? 'crosshair' 
+            : 'grab'
+        }
         onClick={handleMapClick}
       >
         <LocationSearch />
         <MapToolbar 
-          onAddLocation={handleToolbarClick} 
+          onAddLocation={(index) => handleToolbarClick(index)} 
           isAddingLocation={isAddingLocation}
           hasActiveIncident={!!currentIncidentId}
           onStartPathDrawing={() => setIsDrawingPath(true)}
+          onAddFinalLocation={() => setIsAddingFinalLocation(true)}
         />
         <NavigationControl position="bottom-right" />
 
         {/* Path lines */}
         {(() => {
           const pathPoints = theftLocations.filter(m => m.type === 'PATH');
+          console.log('Path points:', pathPoints);
           if (pathPoints.length > 1) {
+            const coordinates = pathPoints.map(p => [p.longitude, p.latitude]);
+            console.log('Path coordinates:', coordinates);
             return (
               <Source
                 type="geojson"
@@ -288,17 +422,36 @@ function MapComponent() {
                   properties: {},
                   geometry: {
                     type: 'LineString',
-                    coordinates: pathPoints.map(p => [p.longitude, p.latitude])
+                    coordinates
                   }
                 }}
               >
+                {/* Background line */}
                 <Layer
-                  id="path-line"
+                  id="path-line-background"
                   type="line"
+                  layout={{
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                  }}
                   paint={{
                     'line-color': '#4a90e2',
-                    'line-width': 2,
-                    'line-dasharray': [2, 1]
+                    'line-width': 4,
+                    'line-opacity': 0.4
+                  }}
+                />
+                {/* Animated dashed line */}
+                <Layer
+                  id="path-line-dashed"
+                  type="line"
+                  layout={{
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                  }}
+                  paint={{
+                    'line-color': '#4a90e2',
+                    'line-width': 3,
+                    'line-dasharray': [0, 4, 3]
                   }}
                 />
               </Source>
@@ -307,7 +460,7 @@ function MapComponent() {
           return null;
         })()}
 
-        {/* Path Points */}
+        {/* Render path points first (underneath) */}
         {theftLocations
           .filter(marker => marker.type === 'PATH')
           .map(marker => (
@@ -321,7 +474,7 @@ function MapComponent() {
           </Marker>
           ))}
 
-        {/* Other Markers */}
+        {/* Render all other markers on top */}
         {theftLocations
           .filter(marker => marker.type !== 'PATH')
           .map(marker => {
@@ -331,7 +484,7 @@ function MapComponent() {
                 key={marker.id}
                 longitude={marker.longitude}
                 latitude={marker.latitude}
-                scale={0.7}
+                scale={1.05}
                 onClick={() => {
                   if (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.()) {
                     window.pathDrawerMethods.handleStartMarkerSelect?.(marker);
@@ -339,10 +492,10 @@ function MapComponent() {
                 }}
               >
                 <div className="relative group">
-                  <div className={`w-6 h-6 ${style.bgColor} rounded-full`}>
+                  <div className={`w-9 h-9 ${style.bgColor} rounded-full`}>
                     <FontAwesomeIcon 
                       icon={style.icon} 
-                      className="text-white text-sm absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                      className="text-white text-base absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
                     />
                   </div>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white p-2 rounded shadow-lg text-xs z-50">
@@ -379,16 +532,38 @@ function MapComponent() {
       </Map>
 
       {tempLocation && (
-        <TheftDetailsDialog
-          isOpen={dialogOpen}
-          onClose={() => {
-            console.log('Closing theft details dialog');
-            setDialogOpen(false);
-            setTempLocation(null);
-          }}
-          onSubmit={handleTheftDetailsSubmit}
-          location={tempLocation}
-        />
+        <>
+          <TheftDetailsDialog
+            isOpen={dialogOpen}
+            onClose={() => {
+              console.log('Closing theft details dialog');
+              setDialogOpen(false);
+              setTempLocation(null);
+            }}
+            onSubmit={handleTheftDetailsSubmit}
+            location={tempLocation}
+          />
+          <StopLocationDialog
+            isOpen={isStopLocationDialogOpen}
+            onClose={() => {
+              console.log('Closing stop location dialog');
+              setIsStopLocationDialogOpen(false);
+              setTempLocation(null);
+            }}
+            onSubmit={handleStopLocationSubmit}
+            location={tempLocation}
+          />
+          <FinalLocationDialog
+            isOpen={isFinalLocationDialogOpen}
+            onClose={() => {
+              console.log('Closing final location dialog');
+              setIsFinalLocationDialogOpen(false);
+              setTempLocation(null);
+            }}
+            onSubmit={handleFinalLocationSubmit}
+            location={tempLocation}
+          />
+        </>
       )}
     </>
   );
