@@ -312,18 +312,13 @@ function MapComponent() {
           .filter(marker => marker.type === 'PATH')
           .map(marker => (
             <Marker
-              key={marker.id}
-              longitude={marker.longitude}
-              latitude={marker.latitude}
-              scale={0.5}
-            >
-              <div className="relative group">
-                <div className="w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm" />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white p-2 rounded shadow-lg text-xs z-50">
-                  <p>Time: {new Date(marker.timestamp).toLocaleString()}</p>
-                </div>
-              </div>
-            </Marker>
+            key={marker.id}
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+            scale={0.5}
+          >
+            <div className="w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm" />
+          </Marker>
           ))}
 
         {/* Other Markers */}
