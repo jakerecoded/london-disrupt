@@ -324,6 +324,13 @@ function MapComponent() {
 
   const handleToolbarClick = (index: number) => {
     console.log('Toolbar clicked with index:', index);
+    if (index === -1) {
+      // Deactivation case
+      setIsAddingLocation(false);
+      setIsAddingStopLocation(false);
+      return;
+    }
+    
     if (index === 0) {
       setIsAddingLocation(!isAddingLocation);
     } else if (index === 2) {
@@ -391,7 +398,7 @@ function MapComponent() {
         style={{ width: '100%', height: '100%' }}
         cursor={
           isAddingLocation || isAddingStopLocation || isAddingFinalLocation || 
-          (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.() === false) 
+          (isDrawingPath && (!window.pathDrawerMethods?.isSelectingStart || window.pathDrawerMethods.isSelectingStart() === false))
             ? 'crosshair' 
             : 'grab'
         }
@@ -402,8 +409,8 @@ function MapComponent() {
           onAddLocation={(index) => handleToolbarClick(index)} 
           isAddingLocation={isAddingLocation}
           hasActiveIncident={!!currentIncidentId}
-          onStartPathDrawing={() => setIsDrawingPath(true)}
-          onAddFinalLocation={() => setIsAddingFinalLocation(true)}
+          onStartPathDrawing={() => setIsDrawingPath(!isDrawingPath)}
+          onAddFinalLocation={() => setIsAddingFinalLocation(!isAddingFinalLocation)}
         />
         <NavigationControl position="bottom-right" />
 

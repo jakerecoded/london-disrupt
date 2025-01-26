@@ -61,17 +61,43 @@ function MapToolbar({ onAddLocation, isAddingLocation, hasActiveIncident, onStar
   }, [isAddingLocation]);
 
   const handleClick = (index: number) => {
+    // If clicking the same button that's active, deactivate it
+    if (index === active) {
+      setActive(null);
+      // Call appropriate handler with false to deactivate
+      if (index === 0 && !hasActiveIncident) {
+        onAddLocation(-1); // Deactivation signal
+      } else if (index === 1 && hasActiveIncident) {
+        onStartPathDrawing(); // Already handles toggle
+      } else if (index === 2 && hasActiveIncident) {
+        onAddLocation(-1); // Deactivation signal
+      } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
+        onAddFinalLocation(); // Toggle off
+      }
+      return;
+    }
+    
+    // Deactivate any currently active tool before activating new one
+    if (active !== null) {
+      if (active === 0 && !hasActiveIncident) {
+        onAddLocation(-1);
+      } else if (active === 1 && hasActiveIncident) {
+        onStartPathDrawing();
+      } else if (active === 2 && hasActiveIncident) {
+        onAddLocation(-1);
+      } else if (active === 3 && hasActiveIncident && onAddFinalLocation) {
+        onAddFinalLocation();
+      }
+    }
+    
+    // Activate new tool
     if (index === 0 && !hasActiveIncident) {
-      // Handle theft location button
       onAddLocation(index);
     } else if (index === 1 && hasActiveIncident) {
-      // Handle route button
       onStartPathDrawing();
     } else if (index === 2 && hasActiveIncident) {
-      // Handle stop location button
       onAddLocation(index);
     } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
-      // Handle final location button
       onAddFinalLocation();
     }
     setActive(index);
