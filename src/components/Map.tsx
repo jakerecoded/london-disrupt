@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import Map, { NavigationControl, Marker, MapRef } from 'react-map-gl';
+import Map, { NavigationControl, Marker, MapRef, Source, Layer } from 'react-map-gl';
 import MapToolbar from './MapToolbar';
 import LocationSearch from './LocationSearch';
 import { faCircle, faFlag, faPersonFallingBurst } from '@fortawesome/free-solid-svg-icons';
@@ -166,12 +166,12 @@ function MapComponent() {
             entry_order: point.entry_order
           }))
         );
-  
+
       if (error) {
         console.error('Error inserting path points:', error);
         throw error;
       }
-  
+
       // Refresh timeline
       const timeline = await loadFullTimeline(currentIncidentId!);
       setTheftLocations(timeline);
@@ -275,40 +275,92 @@ function MapComponent() {
           onStartPathDrawing={() => setIsDrawingPath(true)}
         />
         <NavigationControl position="bottom-right" />
-      
-        {theftLocations.map(marker => {
-          console.log('Rendering marker:', marker);
-          const style = getMarkerStyle(marker.type);
-          return (
+
+        {/* Path lines */}
+        {(() => {
+          const pathPoints = theftLocations.filter(m => m.type === 'PATH');
+          if (pathPoints.length > 1) {
+            return (
+              <Source
+                type="geojson"
+                data={{
+                  type: 'Feature',
+                  properties: {},
+                  geometry: {
+                    type: 'LineString',
+                    coordinates: pathPoints.map(p => [p.longitude, p.latitude])
+                  }
+                }}
+              >
+                <Layer
+                  id="path-line"
+                  type="line"
+                  paint={{
+                    'line-color': '#4a90e2',
+                    'line-width': 2,
+                    'line-dasharray': [2, 1]
+                  }}
+                />
+              </Source>
+            );
+          }
+          return null;
+        })()}
+
+        {/* Path Points */}
+        {theftLocations
+          .filter(marker => marker.type === 'PATH')
+          .map(marker => (
             <Marker
               key={marker.id}
               longitude={marker.longitude}
               latitude={marker.latitude}
-              scale={0.7}
-              onClick={() => {
-                if (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.()) {
-                  window.pathDrawerMethods.handleStartMarkerSelect?.(marker);
-                }
-              }}
+              scale={0.5}
             >
-             <div className="relative group">
-              <div className={`w-6 h-6 ${style.bgColor} rounded-full`}>
-                <FontAwesomeIcon 
-                  icon={style.icon} 
-                  className="text-white text-sm absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                />
+              <div className="relative group">
+                <div className="w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm" />
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white p-2 rounded shadow-lg text-xs z-50">
+                  <p>Time: {new Date(marker.timestamp).toLocaleString()}</p>
+                </div>
               </div>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white p-2 rounded shadow-lg text-xs">
-                <p>Type: {marker.type}</p>
-                <p>Time: {new Date(marker.timestamp).toLocaleString()}</p>
-                {marker.duration_at_location && (
-                  <p>Duration: {marker.duration_at_location}</p>
-                )}
-              </div>
-             </div> 
             </Marker>
-          );
-        })}
+          ))}
+
+        {/* Other Markers */}
+        {theftLocations
+          .filter(marker => marker.type !== 'PATH')
+          .map(marker => {
+            const style = getMarkerStyle(marker.type);
+            return (
+              <Marker
+                key={marker.id}
+                longitude={marker.longitude}
+                latitude={marker.latitude}
+                scale={0.7}
+                onClick={() => {
+                  if (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.()) {
+                    window.pathDrawerMethods.handleStartMarkerSelect?.(marker);
+                  }
+                }}
+              >
+                <div className="relative group">
+                  <div className={`w-6 h-6 ${style.bgColor} rounded-full`}>
+                    <FontAwesomeIcon 
+                      icon={style.icon} 
+                      className="text-white text-sm absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                    />
+                  </div>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-white p-2 rounded shadow-lg text-xs z-50">
+                    <p>Type: {marker.type}</p>
+                    <p>Time: {new Date(marker.timestamp).toLocaleString()}</p>
+                    {marker.duration_at_location && (
+                      <p>Duration: {marker.duration_at_location}</p>
+                    )}
+                  </div>
+                </div>
+              </Marker>
+            );
+          })}
 
         <PathDrawer
           isActive={isDrawingPath}

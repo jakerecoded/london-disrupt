@@ -9,14 +9,6 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
             throw new Error('No authenticated user');
         }
 
-        console.log('Creating incident with data:', {
-            user_id: user.id,
-            reported_to_police: report.reportedToPolice,
-            time_of_theft: report.timeOfTheft,
-            phone_details: report.phoneDetails,
-            victim_details: report.victimDetails
-        });
-
         // First, create the incident record
         const { data: incident, error: incidentError } = await supabase
             .from('phone_theft_incidents')
@@ -34,8 +26,6 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
             console.error('Error creating incident:', incidentError);
             throw incidentError;
         }
-
-        console.log('Created incident:', incident);
 
         // Then create the initial timeline entry
         const { data: timeline, error: timelineError } = await supabase
@@ -56,15 +46,13 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
             throw timelineError;
         }
 
-        console.log('Created timeline entry:', timeline);
-
         return {
-            id: incident.id,
+            id: timeline.id,  // Use the timeline entry's ID
             longitude: report.location.longitude,
             latitude: report.location.latitude,
             type: 'THEFT',
             timestamp: report.timeOfTheft,
-            entry_order: 1  // Added this line
+            entry_order: 1
         };
     } catch (error) {
         console.error('Error creating theft report:', error);
@@ -118,20 +106,20 @@ export const loadFullTimeline = async (incident_id: string): Promise<TimelineMar
                 duration_at_location,
                 timestamp,
                 entry_order
-            `)  // Added entry_order to select
+            `)
             .eq('incident_id', incident_id)
             .order('entry_order', { ascending: true });
 
         if (error) throw error;
 
         return data.map(entry => ({
-            id: entry.incident_id,
+            id: entry.id,  // Use the entry's actual ID instead of incident_id
             latitude: entry.latitude,
             longitude: entry.longitude,
             type: entry.type,
             duration_at_location: entry.duration_at_location,
             timestamp: entry.timestamp,
-            entry_order: entry.entry_order  // Added this line
+            entry_order: entry.entry_order
         }));
     } catch (error) {
         console.error('Error loading timeline:', error);
