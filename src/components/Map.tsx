@@ -152,6 +152,7 @@ function MapComponent() {
   const handlePathComplete = async (points: PathPoint[]) => {
     try {
       setIsLoading(true);
+      console.log('Saving path points:', points);
       
       const { error } = await supabase
         .from('phone_theft_timeline_entries')
@@ -161,14 +162,17 @@ function MapComponent() {
             latitude: point.latitude,
             longitude: point.longitude,
             timestamp: new Date().toISOString(),
-            type: 'PATH',
+            type: 'PATH' as const,
             entry_order: point.entry_order
           }))
-        )
-        .select();
-
-      if (error) throw error;
-
+        );
+  
+      if (error) {
+        console.error('Error inserting path points:', error);
+        throw error;
+      }
+  
+      // Refresh timeline
       const timeline = await loadFullTimeline(currentIncidentId!);
       setTheftLocations(timeline);
       
