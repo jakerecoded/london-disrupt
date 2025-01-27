@@ -1,0 +1,42 @@
+.toolbarContainer {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  padding: 1rem;
+}
+
+.actionButton {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s;
+  background-color: white;
+  color: rgb(55 65 81);
+}
+
+.actionButton:hover:not(.actionButton--disabled) {
+  background-color: rgb(243 244 246);
+}
+
+.actionButton--active {
+  background-color: rgb(59 130 246);
+  color: white;
+}
+
+.actionButton--disabled {
+  background-color: rgb(229 231 235);
+  color: rgb(156 163 175);
+  cursor: not-allowed;
+}
+
+.actionIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -1,5 +1,6 @@
 // components/MapToolbar.tsx
 import { useState, useEffect } from 'react';
+import styles from './MapToolbar.module.css';
 import { IconMap } from '@tabler/icons-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPersonFallingBurst, faRoute, faWarehouse, faSquarePlus, faUserNinja, faPhoneSlash } from '@fortawesome/free-solid-svg-icons';
@@ -19,19 +20,18 @@ function ToolbarButton({ icon: Icon, label, active, disabled, onClick }: Toolbar
     <Tooltip label={disabled ? `Cannot ${label.toLowerCase()} - already exists` : label} position="left">
       <button
         onClick={disabled ? undefined : onClick}
-        className={`p-4 rounded-lg mb-4 transition-colors ${
-          active ?
-            'bg-blue-500 text-white' :
-            disabled ?
-              'bg-gray-200 text-gray-400 cursor-not-allowed' :
-              'bg-white text-gray-700 hover:bg-gray-100'
+        className={`${styles.actionButton} ${
+          active ? styles['actionButton--active'] :
+          disabled ? styles['actionButton--disabled'] : ''
         }`}
       >
-        {typeof Icon === 'object' ? (
-          <FontAwesomeIcon icon={Icon} size="2x" />
-        ) : (
-          <Icon size={32} stroke={1.5} />
-        )}
+        <span className={styles.actionIcon}>
+          {typeof Icon === 'object' ? (
+            <FontAwesomeIcon icon={Icon} size="2x" />
+          ) : (
+            <Icon size={32} stroke={1.5} />
+          )}
+        </span>
       </button>
     </Tooltip>
   );
@@ -117,7 +117,7 @@ function MapToolbar({
   };
 
   return (
-    <div className="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col bg-white rounded-xl shadow-lg p-4">
+    <div className={styles.toolbarContainer}>
       {toolbarItems.map((item, index) => (
         <ToolbarButton
           key={item.label}
