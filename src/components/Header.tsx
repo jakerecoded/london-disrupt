@@ -44,7 +44,7 @@ function Header() {
   };
 
   const items = tabs.map((tab) => (
-    <Tabs.Tab value={tab} key={tab}>
+    <Tabs.Tab value={tab} key={tab} color="white">
       {tab}
     </Tabs.Tab>
   ));
@@ -53,7 +53,7 @@ function Header() {
     <div className={classes.header}>
       <Container className={classes.mainSection} size="xl">
         <Group justify="space-between">
-          <Text className={classes.title}>Phone Theft Tracker</Text>
+          <Text className={classes.title} c="black" size="xl" fw={900} variant="gradient" gradient={{ from: 'cyan', to: 'blue', deg: 72 }}>f o n e j a c k e r</Text>
 
           <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
 
@@ -70,7 +70,7 @@ function Header() {
                 <UnstyledButton
                   className={`${classes.user} ${userMenuOpened ? classes.userActive : ''}`}
                 >
-                  <Group gap={7}>
+                  <Group gap={7} >
                     <Avatar 
                       src={null} 
                       alt={user.email || ''} 
@@ -79,10 +79,10 @@ function Header() {
                     >
                       {user.email?.[0].toUpperCase()}
                     </Avatar>
-                    <Text fw={500} size="sm" lh={1} mr={3}>
+                    <Text fw={500} size="sm" lh={1} mr={3} c="white">
                       {user.email}
                     </Text>
-                    <IconChevronDown size={12} stroke={1.5} />
+                    <IconChevronDown size={12} stroke={1.5} color="white" />
                   </Group>
                 </UnstyledButton>
               </Menu.Target>
@@ -102,7 +102,7 @@ function Header() {
               onClick={() => setShowAuthDialog(true)}
               className={classes.user}
             >
-              <Text size="sm">Sign in</Text>
+              <Text size="sm" c="white">Sign in</Text>
             </UnstyledButton>
           )}
         </Group>
