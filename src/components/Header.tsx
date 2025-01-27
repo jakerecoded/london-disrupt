@@ -53,7 +53,7 @@ function Header() {
     <div className={classes.header}>
       <Container className={classes.mainSection} size="xl">
         <Group justify="space-between">
-          <Text className={classes.title} c="black" size="xl" fw={900} variant="gradient" gradient={{ from: 'cyan', to: 'blue', deg: 72 }}>f o n e j a c k e r</Text>
+          <Text className={classes.title} c="black" size="xl" fw={900} variant="gradient" gradient={{ from: 'cyan', to: 'blue', deg: 72 }}>snatchback.London</Text>
 
           <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
 
@@ -64,13 +64,14 @@ function Header() {
               transitionProps={{ transition: 'pop-top-right' }}
               onClose={() => setUserMenuOpened(false)}
               onOpen={() => setUserMenuOpened(true)}
+              styles={{ dropdown: { background: "#283746", border: "#1c94d8" } }}
               withinPortal
             >
               <Menu.Target>
                 <UnstyledButton
                   className={`${classes.user} ${userMenuOpened ? classes.userActive : ''}`}
                 >
-                  <Group gap={7} >
+                  <Group gap={7} styles={{ root: { padding: 8 } }}>
                     <Avatar 
                       src={null} 
                       alt={user.email || ''} 

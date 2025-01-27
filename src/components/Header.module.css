@@ -1,6 +1,6 @@
 .header {
   padding-top: var(--mantine-spacing-md);
-  background-color: var(--mantine-color-dark-6);
+  background: linear-gradient(90deg, rgba(22,35,46,1) 0%, rgba(21,26,29,1) 100%);
   border-bottom: 1px solid transparent;
   margin-bottom: 0px;
 }
@@ -23,7 +23,7 @@
 }
 
 .user:hover {
-  background-color: var(--mantine-color-dark-8);
+  background-color: #283746;
 }
 
 @media (max-width: 36em) {
@@ -51,15 +51,15 @@
 
 .tab::before,
 .tab::after {
-  background-color: var(--mantine-color-dark-7) !important;
+  background-color: #1e242d !important;
 }
 
 .tab:hover {
-  background-color: var(--mantine-color-dark-5);
+  background-color: #1e242d;
 }
 
 .tab[data-active] {
-  background-color: var(--mantine-color-dark-7);
+  background-color: #283746;
   border-color: var(--mantine-color-dark-7);
   border-bottom-color: transparent;
 }
