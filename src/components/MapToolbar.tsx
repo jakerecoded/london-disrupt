@@ -125,7 +125,8 @@ function MapToolbar({
           active={index === active}
           disabled={
             (index === 0 && hasTheftLocation) || // Theft Location button
-            (index === 3 && hasFinalLocation)    // Final Location button
+            (index === 3 && hasFinalLocation) || // Final Location button
+            (hasFinalLocation && (index === 1 || index === 2)) // Route and Stop Location buttons
           }
           onClick={() => handleClick(index)}
         />
