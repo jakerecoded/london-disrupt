@@ -1,0 +1,65 @@
+.header {
+  padding-top: var(--mantine-spacing-sm);
+  background-color: var(--mantine-color-gray-0);
+  border-bottom: 1px solid var(--mantine-color-gray-2);
+  margin-bottom: 0px;
+  margin-top: 10px;
+}
+
+.mainSection {
+  padding-bottom: var(--mantine-spacing-sm);
+}
+
+.title {
+  color: var(--mantine-color-black);
+  font-size: var(--mantine-font-size-xl);
+  font-weight: bold;
+}
+
+.user {
+  color: var(--mantine-color-black);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 100ms ease;
+}
+
+.user:hover {
+  background-color: var(--mantine-color-white);
+}
+
+@media (max-width: 36em) {
+  .user {
+    display: none;
+  }
+}
+
+.userActive {
+  background-color: var(--mantine-color-white);
+}
+
+.tabsList::before {
+  display: none;
+}
+
+.tab {
+  font-weight: 500;
+  height: 38px;
+  background-color: transparent;
+  position: relative;
+  bottom: -1px;
+}
+
+.tab::before,
+.tab::after {
+  background-color: var(--mantine-color-gray-2) !important;
+}
+
+.tab:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.tab[data-active] {
+  background-color: var(--mantine-color-white);
+  border-color: var(--mantine-color-gray-2);
+  border-bottom-color: transparent;
+}

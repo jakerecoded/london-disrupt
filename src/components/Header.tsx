@@ -1,10 +1,27 @@
 import { useState } from 'react';
+import { IconChevronDown, IconLogout } from '@tabler/icons-react';
+import {
+  Avatar,
+  Burger,
+  Container,
+  Group,
+  Menu,
+  Tabs,
+  Text,
+  UnstyledButton,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import AuthDialog from './AuthDialog';
 import { supabase } from '../lib/supabase';
 import { useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
+import classes from './Header.module.css';
+
+const tabs = ['Home', 'Analytics'];
 
 function Header() {
+  const [opened, { toggle }] = useDisclosure(false);
+  const [userMenuOpened, setUserMenuOpened] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -26,41 +43,90 @@ function Header() {
     await supabase.auth.signOut();
   };
 
+  const items = tabs.map((tab) => (
+    <Tabs.Tab value={tab} key={tab}>
+      {tab}
+    </Tabs.Tab>
+  ));
+
   return (
-    <header className="bg-white shadow">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex-shrink-0 flex items-center">
-            <h1 className="text-xl font-bold">Phone Theft Tracker</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700">{user.email}</span>
-                <button
+    <div className={classes.header}>
+      <Container className={classes.mainSection} size="xl">
+        <Group justify="space-between">
+          <Text className={classes.title}>Phone Theft Tracker</Text>
+
+          <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
+
+          {user ? (
+            <Menu
+              width={260}
+              position="bottom-end"
+              transitionProps={{ transition: 'pop-top-right' }}
+              onClose={() => setUserMenuOpened(false)}
+              onOpen={() => setUserMenuOpened(true)}
+              withinPortal
+            >
+              <Menu.Target>
+                <UnstyledButton
+                  className={`${classes.user} ${userMenuOpened ? classes.userActive : ''}`}
+                >
+                  <Group gap={7}>
+                    <Avatar 
+                      src={null} 
+                      alt={user.email || ''} 
+                      radius="xl" 
+                      size={20}
+                    >
+                      {user.email?.[0].toUpperCase()}
+                    </Avatar>
+                    <Text fw={500} size="sm" lh={1} mr={3}>
+                      {user.email}
+                    </Text>
+                    <IconChevronDown size={12} stroke={1.5} />
+                  </Group>
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>Account</Menu.Label>
+                <Menu.Item
+                  color="red"
+                  leftSection={<IconLogout size={16} stroke={1.5} />}
                   onClick={handleSignOut}
-                  className="text-gray-600 hover:text-gray-900"
                 >
                   Sign out
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowAuthDialog(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Sign in
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          ) : (
+            <UnstyledButton
+              onClick={() => setShowAuthDialog(true)}
+              className={classes.user}
+            >
+              <Text size="sm">Sign in</Text>
+            </UnstyledButton>
+          )}
+        </Group>
+      </Container>
+      <Container size="xl">
+        <Tabs
+          defaultValue="Home"
+          variant="outline"
+          visibleFrom="sm"
+          classNames={{
+            root: classes.tabs,
+            list: classes.tabsList,
+            tab: classes.tab,
+          }}
+        >
+          <Tabs.List>{items}</Tabs.List>
+        </Tabs>
+      </Container>
 
       <AuthDialog 
         isOpen={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)} 
       />
-    </header>
+    </div>
   );
 }
 
