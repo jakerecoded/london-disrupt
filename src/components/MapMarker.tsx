@@ -4,6 +4,7 @@ import { TimelineMarker, TimelineEntryType } from '../types/theft';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faPersonFallingBurst, faWarehouse, faPhoneSlash } from '@fortawesome/free-solid-svg-icons';
 import MarkerTooltip from './MarkerTooltip';
+import PathTooltip from './PathTooltip';
 
 interface MapMarkerProps {
   marker: TimelineMarker;
@@ -109,13 +110,37 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
 
   if (marker.type === 'PATH') {
     return (
-      <Marker
-        longitude={marker.longitude}
-        latitude={marker.latitude}
-        scale={0.5}
-      >
-        <div className="w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm" />
-      </Marker>
+      <>
+        <Marker
+          longitude={marker.longitude}
+          latitude={marker.latitude}
+          scale={0.5}
+        >
+          <div 
+            className="w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm cursor-pointer"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          />
+        </Marker>
+        {showPopup && (
+          <Popup
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+            closeButton={false}
+            closeOnClick={false}
+            onClose={() => setShowPopup(false)}
+            offset={25}
+            className={`mapboxgl-popup ${isVisible ? 'visible' : ''}`}
+          >
+            <div 
+              onMouseEnter={handleTooltipMouseEnter}
+              onMouseLeave={handleTooltipMouseLeave}
+            >
+              <PathTooltip onDelete={onDelete} />
+            </div>
+          </Popup>
+        )}
+      </>
     );
   }
 
