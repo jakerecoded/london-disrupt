@@ -304,6 +304,77 @@ export const deleteFinalLocation = async (entryId: string): Promise<void> => {
     }
 };
 
+export const deleteTimelineEntry = async (entryId: string): Promise<void> => {
+    try {
+        console.log('deleteTimelineEntry called with entryId:', entryId);
+        
+        // First, get the entry to be deleted
+        const { data: existingEntry, error: checkError } = await supabase
+            .from('phone_theft_timeline_entries')
+            .select('*')
+            .eq('id', entryId)
+            .single();
+
+        if (checkError) throw checkError;
+        if (!existingEntry) throw new Error('Entry not found');
+
+        // Special validation for THEFT type - cannot delete initial theft location
+        if (existingEntry.type === 'THEFT') {
+            throw new Error('Cannot delete initial theft location');
+        }
+
+        // Delete the target entry
+        const { error: deleteError } = await supabase
+            .from('phone_theft_timeline_entries')
+            .delete()
+            .eq('id', entryId);
+
+        if (deleteError) throw deleteError;
+
+        // Get all remaining entries for this incident
+        const { data: remainingEntries, error: entriesError } = await supabase
+            .from('phone_theft_timeline_entries')
+            .select('*')
+            .eq('incident_id', existingEntry.incident_id)
+            .order('entry_order', { ascending: true });
+
+        if (entriesError) throw entriesError;
+
+        // Instead of updating existing entries, we'll delete them all and reinsert with correct order
+        if (remainingEntries.length > 0) {
+            // Delete all remaining entries
+            const { error: deleteAllError } = await supabase
+                .from('phone_theft_timeline_entries')
+                .delete()
+                .in('id', remainingEntries.map(e => e.id));
+
+            if (deleteAllError) throw deleteAllError;
+
+            // Reinsert all entries with correct order
+            const reorderedEntries = remainingEntries.map((entry, index) => ({
+                incident_id: entry.incident_id,
+                latitude: entry.latitude,
+                longitude: entry.longitude,
+                timestamp: entry.timestamp,
+                type: entry.type,
+                duration_at_location: entry.duration_at_location,
+                entry_order: index + 1
+            }));
+
+            const { error: insertError } = await supabase
+                .from('phone_theft_timeline_entries')
+                .insert(reorderedEntries);
+
+            if (insertError) throw insertError;
+        }
+
+        console.log('Successfully deleted timeline entry and reordered remaining entries');
+    } catch (error) {
+        console.error('Error in deleteTimelineEntry:', error);
+        throw error;
+    }
+};
+
 export const deleteHoldingLocation = async (entryId: string): Promise<void> => {
     try {
         console.log('deleteHoldingLocation called with entryId:', entryId);
