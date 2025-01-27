@@ -15,6 +15,7 @@ interface MapMarkerProps {
 function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) {
   const [showPopup, setShowPopup] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isTooltipHovered, setIsTooltipHovered] = useState(false);
   const showTimeoutRef = useRef<NodeJS.Timeout>();
   const hideTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -52,9 +53,26 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
     if (showTimeoutRef.current) {
       clearTimeout(showTimeoutRef.current);
     }
+    // Only hide if tooltip is not being hovered
+    if (!isTooltipHovered) {
+      hideTimeoutRef.current = setTimeout(() => {
+        setShowPopup(false);
+      }, 500); // 0.5s delay before hiding
+    }
+  };
+
+  const handleTooltipMouseEnter = () => {
+    setIsTooltipHovered(true);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+  };
+
+  const handleTooltipMouseLeave = () => {
+    setIsTooltipHovered(false);
     hideTimeoutRef.current = setTimeout(() => {
       setShowPopup(false);
-    }, 500); // 0.5s delay before hiding
+    }, 500);
   };
 
   const getMarkerStyle = (type: TimelineEntryType) => {
@@ -129,7 +147,12 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
           offset={25}
           className={`mapboxgl-popup ${isVisible ? 'visible' : ''}`}
         >
-          <MarkerTooltip marker={marker} onDelete={onDelete} />
+          <div 
+            onMouseEnter={handleTooltipMouseEnter}
+            onMouseLeave={handleTooltipMouseLeave}
+          >
+            <MarkerTooltip marker={marker} onDelete={onDelete} />
+          </div>
         </Popup>
       )}
     </>

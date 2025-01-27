@@ -256,6 +256,54 @@ export const loadFullTimeline = async (incident_id: string): Promise<TimelineMar
     }
 };
 
+export const deleteFinalLocation = async (entryId: string): Promise<void> => {
+    try {
+        console.log('deleteFinalLocation called with entryId:', entryId);
+        
+        // First, verify the entry exists and check its type
+        const { data: existingEntry, error: checkError } = await supabase
+            .from('phone_theft_timeline_entries')
+            .select('*')
+            .eq('id', entryId)
+            .single();
+
+        console.log('Existing entry check:', { existingEntry, checkError });
+
+        if (checkError) {
+            console.error('Error checking entry:', checkError);
+            throw checkError;
+        }
+
+        if (!existingEntry) {
+            console.error('Entry not found:', entryId);
+            throw new Error('Entry not found');
+        }
+
+        if (existingEntry.type !== 'FINAL') {
+            console.error('Entry is not a FINAL type:', existingEntry.type);
+            throw new Error('Entry is not a FINAL type');
+        }
+
+        // If we get here, we know the entry exists and is a FINAL type
+        const { error } = await supabase
+            .from('phone_theft_timeline_entries')
+            .delete()
+            .eq('id', entryId);
+
+        console.log('Supabase delete response:', { error });
+
+        if (error) {
+            console.error('Supabase delete error:', error);
+            throw error;
+        }
+
+        console.log('Successfully deleted final location');
+    } catch (error) {
+        console.error('Error deleting final location:', error);
+        throw error;
+    }
+};
+
 export const deleteHoldingLocation = async (entryId: string): Promise<void> => {
     try {
         console.log('deleteHoldingLocation called with entryId:', entryId);

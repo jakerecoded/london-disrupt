@@ -8,10 +8,11 @@ import TheftDetailsDialog from './TheftDetailsDialog';
 import StopLocationDialog from './StopLocationDialog';
 import FinalLocationDialog from './FinalLocationDialog';
 import { InitialTheftReport, TimelineMarker, PathPoint } from '../types/theft';
-import { createTheftReport, loadFullTimeline, createStopLocationEntry, createFinalLocationEntry, deleteHoldingLocation } from '../services/theftService';
+import { createTheftReport, loadFullTimeline, createStopLocationEntry, createFinalLocationEntry, deleteHoldingLocation, deleteFinalLocation } from '../services/theftService';
 import { supabase } from '../lib/supabase';
 import PathDrawer from './PathDrawer';
 import DeleteHoldingDialog from './DeleteHoldingDialog';
+import DeleteFinalDialog from './DeleteFinalDialog';
 
 function MapComponent() {
   const mapRef = useRef<MapRef>(null);
@@ -35,6 +36,7 @@ function MapComponent() {
   const [hasTheftLocation, setHasTheftLocation] = useState(false);
   const [hasFinalLocation, setHasFinalLocation] = useState(false);
   const [isDeleteHoldingDialogOpen, setIsDeleteHoldingDialogOpen] = useState(false);
+  const [isDeleteFinalDialogOpen, setIsDeleteFinalDialogOpen] = useState(false);
   const [markerToDelete, setMarkerToDelete] = useState<TimelineMarker | null>(null);
 
   useEffect(() => {
@@ -467,6 +469,9 @@ function MapComponent() {
                 if (marker.type === 'HOLDING') {
                   setMarkerToDelete(marker);
                   setIsDeleteHoldingDialogOpen(true);
+                } else if (marker.type === 'FINAL') {
+                  setMarkerToDelete(marker);
+                  setIsDeleteFinalDialogOpen(true);
                 }
               }}
             />
@@ -488,6 +493,9 @@ function MapComponent() {
                 if (marker.type === 'HOLDING') {
                   setMarkerToDelete(marker);
                   setIsDeleteHoldingDialogOpen(true);
+                } else if (marker.type === 'FINAL') {
+                  setMarkerToDelete(marker);
+                  setIsDeleteFinalDialogOpen(true);
                 }
               }}
             />
@@ -548,6 +556,46 @@ function MapComponent() {
           } catch (error) {
             console.error('Failed to delete holding location:', error);
             setError('Failed to delete holding location');
+          } finally {
+            setIsLoading(false);
+          }
+        }}
+      />
+
+      <DeleteFinalDialog
+        isOpen={isDeleteFinalDialogOpen}
+        onClose={() => {
+          setIsDeleteFinalDialogOpen(false);
+          setMarkerToDelete(null);
+        }}
+        onConfirm={async () => {
+          try {
+            setIsLoading(true);
+            if (!markerToDelete || !currentIncidentId) {
+              console.warn('No marker selected for deletion or no current incident');
+              return;
+            }
+
+            console.log('Attempting to delete final location:', {
+              markerId: markerToDelete.id,
+              markerType: markerToDelete.type,
+              incidentId: currentIncidentId
+            });
+            
+            await deleteFinalLocation(markerToDelete.id);
+            
+            // After successful deletion, filter out the deleted marker immediately
+            setTheftLocations(prev => prev.filter(marker => marker.id !== markerToDelete.id));
+            
+            // Then refresh the full timeline
+            const timeline = await loadFullTimeline(currentIncidentId);
+            setTheftLocations(timeline);
+            
+            setIsDeleteFinalDialogOpen(false);
+            setMarkerToDelete(null);
+          } catch (error) {
+            console.error('Failed to delete final location:', error);
+            setError('Failed to delete final location');
           } finally {
             setIsLoading(false);
           }
