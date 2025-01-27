@@ -39,6 +39,15 @@ function MapComponent() {
   const [isDeleteFinalDialogOpen, setIsDeleteFinalDialogOpen] = useState(false);
   const [markerToDelete, setMarkerToDelete] = useState<TimelineMarker | null>(null);
 
+  // Update path when map moves
+  useEffect(() => {
+    const pathPoints = theftLocations.filter(m => m.type === 'PATH');
+    if (pathPoints.length > 1 && mapRef.current) {
+      // Force re-render of SVG path
+      setViewState(prev => ({...prev}));
+    }
+  }, [viewState.longitude, viewState.latitude, viewState.zoom, theftLocations]);
+
   useEffect(() => {
     const loadUserIncidents = async () => {
       try {
@@ -358,15 +367,6 @@ function MapComponent() {
       }
     };
   }, [theftLocations]);
-
-  // Update path when map moves
-  useEffect(() => {
-    const pathPoints = theftLocations.filter(m => m.type === 'PATH');
-    if (pathPoints.length > 1 && mapRef.current) {
-      // Force re-render of SVG path
-      setViewState(prev => ({...prev}));
-    }
-  }, [viewState.longitude, viewState.latitude, viewState.zoom, theftLocations]);
 
   return (
     <>
