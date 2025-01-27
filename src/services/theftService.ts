@@ -214,6 +214,8 @@ export const loadInitialTheftMarker = async (incident_id: string): Promise<Timel
 
 export const loadFullTimeline = async (incident_id: string): Promise<TimelineMarker[]> => {
     try {
+        console.log('Loading full timeline for incident:', incident_id);
+        
         const { data, error } = await supabase
             .from('phone_theft_timeline_entries')
             .select(`
@@ -229,10 +231,15 @@ export const loadFullTimeline = async (incident_id: string): Promise<TimelineMar
             .eq('incident_id', incident_id)
             .order('entry_order', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Error loading timeline:', error);
+            throw error;
+        }
 
-        return data.map(entry => ({
-            id: entry.id,  // Use the entry's actual ID instead of incident_id
+        console.log('Timeline data from database:', data);
+
+        const mappedData = data.map(entry => ({
+            id: entry.id,
             latitude: entry.latitude,
             longitude: entry.longitude,
             type: entry.type,
@@ -240,8 +247,61 @@ export const loadFullTimeline = async (incident_id: string): Promise<TimelineMar
             timestamp: entry.timestamp,
             entry_order: entry.entry_order
         }));
+
+        console.log('Mapped timeline data:', mappedData);
+        return mappedData;
     } catch (error) {
         console.error('Error loading timeline:', error);
+        throw error;
+    }
+};
+
+export const deleteHoldingLocation = async (entryId: string): Promise<void> => {
+    try {
+        console.log('deleteHoldingLocation called with entryId:', entryId);
+        
+        // First, verify the entry exists and check its type
+        const { data: existingEntry, error: checkError } = await supabase
+            .from('phone_theft_timeline_entries')
+            .select('*')
+            .eq('id', entryId)
+            .single();
+
+        console.log('Existing entry check:', { existingEntry, checkError });
+
+        if (checkError) {
+            console.error('Error checking entry:', checkError);
+            throw checkError;
+        }
+
+        if (!existingEntry) {
+            console.error('Entry not found:', entryId);
+            throw new Error('Entry not found');
+        }
+
+        if (existingEntry.type !== 'HOLDING') {
+            console.error('Entry is not a HOLDING type:', existingEntry.type);
+            throw new Error('Entry is not a HOLDING type');
+        }
+
+        // If we get here, we know the entry exists and is a HOLDING type
+        const { error } = await supabase
+            .from('phone_theft_timeline_entries')
+            .delete()
+            .eq('id', entryId);
+
+        console.log('Supabase delete response:', { error });
+
+        if (error) {
+            console.error('Supabase delete error:', error);
+            throw error;
+        }
+
+        // Since we verified the entry exists and is of type HOLDING,
+        // if we get here without an error, the delete was successful
+        console.log('Successfully deleted holding location');
+    } catch (error) {
+        console.error('Error deleting holding location:', error);
         throw error;
     }
 };
