@@ -103,7 +103,7 @@ function Header() {
               onClick={() => setShowAuthDialog(true)}
               className={classes.user}
             >
-              <Text size="sm" c="white">Sign in</Text>
+              <Text size="sm" c="white" styles={{ root: { padding: 8 } }}>Sign in</Text>
             </UnstyledButton>
           )}
         </Group>
