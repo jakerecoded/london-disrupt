@@ -6,23 +6,32 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPersonFallingBurst, faRoute, faWarehouse, faSquarePlus, faUserNinja, faPhoneSlash } from '@fortawesome/free-solid-svg-icons';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { Tooltip } from '@mantine/core';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ToolbarButtonProps {
   icon: typeof IconMap | IconDefinition;
   label: string;
   active?: boolean;
   disabled?: boolean;
+  isLoggedOut?: boolean;
   onClick?: () => void;
 }
 
-function ToolbarButton({ icon: Icon, label, active, disabled, onClick }: ToolbarButtonProps) {
+function ToolbarButton({ icon: Icon, label, active, disabled, isLoggedOut, onClick }: ToolbarButtonProps) {
+  let tooltipLabel = label;
+  if (isLoggedOut) {
+    tooltipLabel = `Cannot ${label.toLowerCase()} - sign in to continue`;
+  } else if (disabled) {
+    tooltipLabel = `Cannot ${label.toLowerCase()} - already exists`;
+  }
+
   return (
-    <Tooltip label={disabled ? `Cannot ${label.toLowerCase()} - already exists` : label} position="left">
+    <Tooltip label={tooltipLabel} position="left">
       <button
-        onClick={disabled ? undefined : onClick}
+        onClick={isLoggedOut ? undefined : disabled ? undefined : onClick}
         className={`${styles.actionButton} ${
           active ? styles['actionButton--active'] :
-          disabled ? styles['actionButton--disabled'] : ''
+          (disabled || isLoggedOut) ? styles['actionButton--disabled'] : ''
         }`}
       >
         <span className={styles.actionIcon}>
@@ -56,7 +65,7 @@ interface MapToolbarProps {
   hasFinalLocation?: boolean;
 }
 
-function MapToolbar({ 
+function MapToolbar({
   onAddLocation, 
   isAddingLocation, 
   hasActiveIncident, 
@@ -116,6 +125,9 @@ function MapToolbar({
     setActive(index);
   };
 
+  const { user } = useAuth();
+  const isLoggedOut = !user;
+
   return (
     <div className={styles.toolbarContainer}>
       {toolbarItems.map((item, index) => (
@@ -123,6 +135,7 @@ function MapToolbar({
           key={item.label}
           {...item}
           active={index === active}
+          isLoggedOut={isLoggedOut}
           disabled={
             (index === 0 && hasTheftLocation) || // Theft Location button
             (index === 3 && hasFinalLocation) || // Final Location button
