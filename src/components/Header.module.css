@@ -42,6 +42,7 @@
 
 .tab {
   font-weight: 500;
+  font-size: large !important;
   height: 38px;
   background-color: transparent;
   position: relative;
