@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import Map, { NavigationControl, MapRef, Source, Layer } from 'react-map-gl';
 import MapToolbar from './MapToolbar';
 import LocationSearch from './LocationSearch';
@@ -14,6 +15,7 @@ import PathDrawer from './PathDrawer';
 import DeleteMarkerDialog from './DeleteMarkerDialog';
 
 function MapComponent() {
+  const { user } = useAuth();
   const mapRef = useRef<MapRef>(null);
   const [viewState, setViewState] = useState({
     longitude: -0.1276,
@@ -45,6 +47,19 @@ function MapComponent() {
       setViewState(prev => ({...prev}));
     }
   }, [viewState.longitude, viewState.latitude, viewState.zoom, theftLocations]);
+
+  // Clear map data when user signs out
+  useEffect(() => {
+    if (!user) {
+      setTheftLocations([]);
+      setCurrentIncidentId(null);
+      setTempLocation(null);
+      setIsDrawingPath(false);
+      setIsAddingLocation(false);
+      setIsAddingStopLocation(false);
+      setIsAddingFinalLocation(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     const loadUserIncidents = async () => {
