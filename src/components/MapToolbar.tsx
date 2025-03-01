@@ -58,6 +58,9 @@ const toolbarItems = [
 interface MapToolbarProps {
   onAddLocation: (index: number) => void;
   isAddingLocation: boolean;
+  isAddingStopLocation?: boolean;
+  isAddingFinalLocation?: boolean;
+  isDrawingPath?: boolean;
   hasActiveIncident?: boolean;
   onStartPathDrawing: () => void;
   onAddFinalLocation?: () => void;
@@ -67,7 +70,10 @@ interface MapToolbarProps {
 
 function MapToolbar({
   onAddLocation, 
-  isAddingLocation, 
+  isAddingLocation,
+  isAddingStopLocation = false,
+  isAddingFinalLocation = false,
+  isDrawingPath = false,
   hasActiveIncident, 
   onStartPathDrawing, 
   onAddFinalLocation,
@@ -77,10 +83,11 @@ function MapToolbar({
   const [active, setActive] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!isAddingLocation) {
+    // Reset active state when all action modes are inactive
+    if (!isAddingLocation && !isAddingStopLocation && !isAddingFinalLocation && !isDrawingPath) {
       setActive(null);
     }
-  }, [isAddingLocation]);
+  }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath]);
 
   const handleClick = (index: number) => {
     // If clicking the same button that's active, deactivate it

@@ -421,6 +421,9 @@ function MapComponent() {
         <MapToolbar 
           onAddLocation={(index) => handleToolbarClick(index)} 
           isAddingLocation={isAddingLocation}
+          isAddingStopLocation={isAddingStopLocation}
+          isAddingFinalLocation={isAddingFinalLocation}
+          isDrawingPath={isDrawingPath}
           hasActiveIncident={!!currentIncidentId}
           onStartPathDrawing={() => setIsDrawingPath(!isDrawingPath)}
           onAddFinalLocation={() => setIsAddingFinalLocation(!isAddingFinalLocation)}
