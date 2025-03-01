@@ -347,39 +347,54 @@ function MapComponent() {
 
   // Animation setup for path lines
   useEffect(() => {
+    // Using the exact same dash array sequence from the example
     const dashArraySequence = [
       [0, 4, 3],
+      [0.5, 4, 2.5],
       [1, 4, 2],
+      [1.5, 4, 1.5],
       [2, 4, 1],
+      [2.5, 4, 0.5],
       [3, 4, 0],
+      [0, 0.5, 3, 3.5],
       [0, 1, 3, 3],
+      [0, 1.5, 3, 2.5],
       [0, 2, 3, 2],
-      [0, 3, 3, 1]
+      [0, 2.5, 3, 1.5],
+      [0, 3, 3, 1],
+      [0, 3.5, 3, 0.5]
     ];
 
     let step = 0;
-    let animationTimer: number;
+    let animationFrameId: number;
 
-    const animate = () => {
+    const animate = (timestamp: number) => {
       if (!mapRef.current) return;
-      step = (step + 1) % dashArraySequence.length;
-      mapRef.current.getMap().setPaintProperty(
-        'path-line-dashed',
-        'line-dasharray',
-        dashArraySequence[step]
-      );
-      animationTimer = window.setTimeout(animate, 100);
+      
+      // Change step every 50ms like in the example
+      const newStep = Math.floor((timestamp / 50) % dashArraySequence.length);
+      
+      if (newStep !== step) {
+        mapRef.current.getMap().setPaintProperty(
+          'path-line-dashed',
+          'line-dasharray',
+          dashArraySequence[newStep]
+        );
+        step = newStep;
+      }
+      
+      animationFrameId = requestAnimationFrame(animate);
     };
 
     // Start animation if we have path points
     const pathPoints = theftLocations.filter(m => m.type === 'PATH');
     if (pathPoints.length > 1) {
-      animate();
+      animationFrameId = requestAnimationFrame(animate);
     }
 
     return () => {
-      if (animationTimer) {
-        clearTimeout(animationTimer);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
   }, [theftLocations]);
@@ -443,7 +458,7 @@ function MapComponent() {
                   }}
                   paint={{
                     'line-color': '#4a90e2',
-                    'line-width': 4,
+                    'line-width': 6,
                     'line-opacity': 0.4
                   }}
                 />
@@ -459,7 +474,7 @@ function MapComponent() {
                   }}
                   paint={{
                     'line-color': '#4a90e2',
-                    'line-width': 3,
+                    'line-width': 6,
                     'line-dasharray': [0, 4, 3]
                   }}
                 />
