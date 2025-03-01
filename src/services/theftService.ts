@@ -375,6 +375,32 @@ export const deleteTimelineEntry = async (entryId: string): Promise<void> => {
     }
 };
 
+export const deleteInitialTheftLocation = async (incidentId: string): Promise<void> => {
+    try {
+        console.log('Deleting initial theft location and all associated data for incident:', incidentId);
+        
+        // Start a Supabase transaction by using multiple operations
+        const { error: timelineError } = await supabase
+            .from('phone_theft_timeline_entries')
+            .delete()
+            .eq('incident_id', incidentId);
+
+        if (timelineError) throw timelineError;
+
+        const { error: incidentError } = await supabase
+            .from('phone_theft_incidents')
+            .delete()
+            .eq('id', incidentId);
+
+        if (incidentError) throw incidentError;
+
+        console.log('Successfully deleted initial theft location and all associated data');
+    } catch (error) {
+        console.error('Error deleting initial theft location:', error);
+        throw error;
+    }
+};
+
 export const deleteHoldingLocation = async (entryId: string): Promise<void> => {
     try {
         console.log('deleteHoldingLocation called with entryId:', entryId);

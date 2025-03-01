@@ -13,6 +13,8 @@ import { createTheftReport, loadFullTimeline, createStopLocationEntry, createFin
 import { supabase } from '../lib/supabase';
 import PathDrawer from './PathDrawer';
 import DeleteMarkerDialog from './DeleteMarkerDialog';
+import DeleteInitialDialog from './DeleteInitialDialog';
+import { deleteInitialTheftLocation } from '../services/theftService';
 
 function MapComponent() {
   const { user } = useAuth();
@@ -38,6 +40,7 @@ function MapComponent() {
   const [hasFinalLocation, setHasFinalLocation] = useState(false);
   const [isDeleteMarkerDialogOpen, setIsDeleteMarkerDialogOpen] = useState(false);
   const [markerToDelete, setMarkerToDelete] = useState<TimelineMarker | null>(null);
+  const [isDeleteInitialDialogOpen, setIsDeleteInitialDialogOpen] = useState(false);
 
   // Update path when map moves
   useEffect(() => {
@@ -479,8 +482,13 @@ function MapComponent() {
                 }
               }}
               onDelete={() => {
-                setMarkerToDelete(marker);
-                setIsDeleteMarkerDialogOpen(true);
+                if (marker.type === 'THEFT') {
+                  setMarkerToDelete(marker);
+                  setIsDeleteInitialDialogOpen(true);
+                } else {
+                  setMarkerToDelete(marker);
+                  setIsDeleteMarkerDialogOpen(true);
+                }
               }}
             />
           ))}
@@ -498,8 +506,13 @@ function MapComponent() {
                 }
               }}
               onDelete={() => {
-                setMarkerToDelete(marker);
-                setIsDeleteMarkerDialogOpen(true);
+                if (marker.type === 'THEFT') {
+                  setMarkerToDelete(marker);
+                  setIsDeleteInitialDialogOpen(true);
+                } else {
+                  setMarkerToDelete(marker);
+                  setIsDeleteMarkerDialogOpen(true);
+                }
               }}
             />
           ))}
@@ -524,6 +537,42 @@ function MapComponent() {
           </div>
         )}
       </Map>
+
+      <DeleteInitialDialog
+        isOpen={isDeleteInitialDialogOpen}
+        onClose={() => {
+          setIsDeleteInitialDialogOpen(false);
+          setMarkerToDelete(null);
+        }}
+        onConfirm={async () => {
+          try {
+            setIsLoading(true);
+            if (!markerToDelete || !currentIncidentId) {
+              console.warn('No marker selected for deletion or no current incident');
+              return;
+            }
+
+            console.log('Attempting to delete initial theft location:', {
+              markerId: markerToDelete.id,
+              incidentId: currentIncidentId
+            });
+            
+            await deleteInitialTheftLocation(currentIncidentId);
+            
+            // Clear all markers and reset state
+            setTheftLocations([]);
+            setCurrentIncidentId(null);
+            setIsDeleteInitialDialogOpen(false);
+            setMarkerToDelete(null);
+            
+          } catch (error) {
+            console.error('Failed to delete initial theft location:', error);
+            setError('Failed to delete initial theft location');
+          } finally {
+            setIsLoading(false);
+          }
+        }}
+      />
 
       <DeleteMarkerDialog
         isOpen={isDeleteMarkerDialogOpen}
