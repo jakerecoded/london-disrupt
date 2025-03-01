@@ -64,8 +64,11 @@ interface MapToolbarProps {
   hasActiveIncident?: boolean;
   onStartPathDrawing: () => void;
   onAddFinalLocation?: () => void;
+  onAddPerpetratorInfo?: () => void;
+  isAddingPerpetratorInfo?: boolean;
   hasTheftLocation?: boolean;
   hasFinalLocation?: boolean;
+  hasPerpetratorInfo?: boolean;
 }
 
 function MapToolbar({
@@ -77,17 +80,20 @@ function MapToolbar({
   hasActiveIncident, 
   onStartPathDrawing, 
   onAddFinalLocation,
+  onAddPerpetratorInfo,
+  isAddingPerpetratorInfo = false,
   hasTheftLocation,
-  hasFinalLocation 
+  hasFinalLocation,
+  hasPerpetratorInfo = false
 }: MapToolbarProps) {
   const [active, setActive] = useState<number | null>(null);
 
   useEffect(() => {
     // Reset active state when all action modes are inactive
-    if (!isAddingLocation && !isAddingStopLocation && !isAddingFinalLocation && !isDrawingPath) {
+    if (!isAddingLocation && !isAddingStopLocation && !isAddingFinalLocation && !isDrawingPath && !isAddingPerpetratorInfo) {
       setActive(null);
     }
-  }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath]);
+  }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath, isAddingPerpetratorInfo]);
 
   const handleClick = (index: number) => {
     // If clicking the same button that's active, deactivate it
@@ -126,9 +132,11 @@ function MapToolbar({
       onStartPathDrawing();
     } else if (index === 2 && hasActiveIncident) {
       onAddLocation(index);
-    } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
-      onAddFinalLocation();
-    }
+      } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
+        onAddFinalLocation();
+      } else if (index === 4 && hasActiveIncident && onAddPerpetratorInfo) {
+        onAddPerpetratorInfo();
+      }
     setActive(index);
   };
 
@@ -141,7 +149,10 @@ function MapToolbar({
         <ToolbarButton
           key={item.label}
           {...item}
-          active={index === active}
+          active={
+            index === active || 
+            (index === 4 && hasPerpetratorInfo) // Show perpetrator info button as active if info exists
+          }
           isLoggedOut={isLoggedOut}
           disabled={
             (index === 0 && hasTheftLocation) || // Theft Location button

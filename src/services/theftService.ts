@@ -375,11 +375,119 @@ export const deleteTimelineEntry = async (entryId: string): Promise<void> => {
     }
 };
 
+export const savePerpetratorInformation = async (
+    incidentId: string,
+    info: {
+        vehicleInformation: string;
+        clothingInformation: string;
+        groupInformation: string;
+        otherInformation: string;
+    }
+): Promise<void> => {
+    try {
+        console.log('Saving perpetrator information for incident:', incidentId);
+        
+        // Check if a record already exists for this incident
+        const { data: existingInfo, error: fetchError } = await supabase
+            .from('perpetrator_information')
+            .select('id')
+            .eq('incident_id', incidentId)
+            .maybeSingle();
+
+        if (fetchError) throw fetchError;
+
+        if (existingInfo) {
+            // Update existing record
+            console.log('Updating existing perpetrator information record');
+            const { error: updateError } = await supabase
+                .from('perpetrator_information')
+                .update({
+                    vehicle_information: info.vehicleInformation,
+                    clothing_information: info.clothingInformation,
+                    group_information: info.groupInformation,
+                    other_information: info.otherInformation
+                })
+                .eq('id', existingInfo.id);
+
+            if (updateError) throw updateError;
+        } else {
+            // Insert new record
+            console.log('Creating new perpetrator information record');
+            const { error: insertError } = await supabase
+                .from('perpetrator_information')
+                .insert({
+                    incident_id: incidentId,
+                    vehicle_information: info.vehicleInformation,
+                    clothing_information: info.clothingInformation,
+                    group_information: info.groupInformation,
+                    other_information: info.otherInformation
+                });
+
+            if (insertError) throw insertError;
+        }
+        
+        console.log('Successfully saved perpetrator information');
+    } catch (error) {
+        console.error('Error saving perpetrator information:', error);
+        throw error;
+    }
+};
+
+export const loadPerpetratorInformation = async (
+    incidentId: string
+): Promise<{
+    vehicleInformation: string;
+    clothingInformation: string;
+    groupInformation: string;
+    otherInformation: string;
+} | null> => {
+    try {
+        console.log('Loading perpetrator information for incident:', incidentId);
+        
+        const { data, error } = await supabase
+            .from('perpetrator_information')
+            .select('*')
+            .eq('incident_id', incidentId)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        if (!data) {
+            console.log('No perpetrator information found for incident:', incidentId);
+            return null;
+        }
+
+        console.log('Found perpetrator information:', data);
+        
+        return {
+            vehicleInformation: data.vehicle_information || '',
+            clothingInformation: data.clothing_information || '',
+            groupInformation: data.group_information || '',
+            otherInformation: data.other_information || ''
+        };
+    } catch (error) {
+        console.error('Error loading perpetrator information:', error);
+        throw error;
+    }
+};
+
 export const deleteInitialTheftLocation = async (incidentId: string): Promise<void> => {
     try {
         console.log('Deleting initial theft location and all associated data for incident:', incidentId);
         
-        // Start a Supabase transaction by using multiple operations
+        // Delete perpetrator information first
+        const { error: perpetratorError } = await supabase
+            .from('perpetrator_information')
+            .delete()
+            .eq('incident_id', incidentId);
+
+        if (perpetratorError) {
+            console.error('Error deleting perpetrator information:', perpetratorError);
+            // Continue with deletion even if perpetrator info deletion fails
+            // This is to ensure we don't leave orphaned records
+        }
+        
+        // Delete timeline entries
         const { error: timelineError } = await supabase
             .from('phone_theft_timeline_entries')
             .delete()
@@ -387,6 +495,7 @@ export const deleteInitialTheftLocation = async (incidentId: string): Promise<vo
 
         if (timelineError) throw timelineError;
 
+        // Finally delete the incident
         const { error: incidentError } = await supabase
             .from('phone_theft_incidents')
             .delete()

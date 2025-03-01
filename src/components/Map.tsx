@@ -8,13 +8,22 @@ import { MapLayerMouseEvent } from 'mapbox-gl';
 import TheftDetailsDialog from './TheftDetailsDialog';
 import StopLocationDialog from './StopLocationDialog';
 import FinalLocationDialog from './FinalLocationDialog';
+import PerpetratorInformationDialog from './PerpetratorInformationDialog';
 import { InitialTheftReport, TimelineMarker, PathPoint } from '../types/theft';
-import { createTheftReport, loadFullTimeline, createStopLocationEntry, createFinalLocationEntry, deleteTimelineEntry } from '../services/theftService';
+import { 
+  createTheftReport, 
+  loadFullTimeline, 
+  createStopLocationEntry, 
+  createFinalLocationEntry, 
+  deleteTimelineEntry,
+  savePerpetratorInformation,
+  loadPerpetratorInformation,
+  deleteInitialTheftLocation
+} from '../services/theftService';
 import { supabase } from '../lib/supabase';
 import PathDrawer from './PathDrawer';
 import DeleteMarkerDialog from './DeleteMarkerDialog';
 import DeleteInitialDialog from './DeleteInitialDialog';
-import { deleteInitialTheftLocation } from '../services/theftService';
 
 function MapComponent() {
   const { user } = useAuth();
@@ -41,6 +50,14 @@ function MapComponent() {
   const [isDeleteMarkerDialogOpen, setIsDeleteMarkerDialogOpen] = useState(false);
   const [markerToDelete, setMarkerToDelete] = useState<TimelineMarker | null>(null);
   const [isDeleteInitialDialogOpen, setIsDeleteInitialDialogOpen] = useState(false);
+  const [isPerpetratorDialogOpen, setIsPerpetratorDialogOpen] = useState(false);
+  const [perpetratorInfo, setPerpetratorInfo] = useState({
+    vehicleInformation: '',
+    clothingInformation: '',
+    groupInformation: '',
+    otherInformation: ''
+  });
+  const [hasPerpetratorInfo, setHasPerpetratorInfo] = useState(false);
 
   // Update path when map moves
   useEffect(() => {
@@ -143,6 +160,83 @@ function MapComponent() {
     setHasTheftLocation(theftLocations.some(marker => marker.type === 'THEFT'));
     setHasFinalLocation(theftLocations.some(marker => marker.type === 'FINAL'));
   }, [theftLocations]);
+
+  // Load perpetrator information when an incident is loaded
+  useEffect(() => {
+    const loadPerpetratorInfo = async () => {
+      if (!currentIncidentId) {
+        console.log('No current incident ID, skipping perpetrator info load');
+        return;
+      }
+      
+      try {
+        console.log('Loading perpetrator information for incident:', currentIncidentId);
+        const info = await loadPerpetratorInformation(currentIncidentId);
+        
+        if (info) {
+          console.log('Found perpetrator information:', info);
+          setPerpetratorInfo(info);
+          
+          // Check if any field has content
+          const hasInfo = !!(
+            info.vehicleInformation || 
+            info.clothingInformation || 
+            info.groupInformation || 
+            info.otherInformation
+          );
+          
+          setHasPerpetratorInfo(hasInfo);
+        } else {
+          console.log('No perpetrator information found');
+          setHasPerpetratorInfo(false);
+        }
+      } catch (error) {
+        console.error('Failed to load perpetrator information:', error);
+        // Don't set an error state here, as it's not critical to the app
+      }
+    };
+
+    loadPerpetratorInfo();
+  }, [currentIncidentId]);
+
+  // Handle perpetrator information save
+  const handlePerpetratorInfoSave = async (info: {
+    vehicleInformation: string;
+    clothingInformation: string;
+    groupInformation: string;
+    otherInformation: string;
+  }) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      if (!currentIncidentId) {
+        throw new Error('No active incident');
+      }
+      
+      console.log('Saving perpetrator information:', info);
+      await savePerpetratorInformation(currentIncidentId, info);
+      
+      setPerpetratorInfo(info);
+      
+      // Check if any field has content
+      const hasInfo = !!(
+        info.vehicleInformation || 
+        info.clothingInformation || 
+        info.groupInformation || 
+        info.otherInformation
+      );
+      
+      setHasPerpetratorInfo(hasInfo);
+      setIsPerpetratorDialogOpen(false);
+      
+    } catch (error) {
+      console.error('Failed to save perpetrator information:', error);
+      setError('Failed to save perpetrator information');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleMapClick = useCallback((event: MapLayerMouseEvent) => {
     if (isAddingLocation) {
@@ -427,8 +521,11 @@ function MapComponent() {
           hasActiveIncident={!!currentIncidentId}
           onStartPathDrawing={() => setIsDrawingPath(!isDrawingPath)}
           onAddFinalLocation={() => setIsAddingFinalLocation(!isAddingFinalLocation)}
+          onAddPerpetratorInfo={() => setIsPerpetratorDialogOpen(true)}
+          isAddingPerpetratorInfo={isPerpetratorDialogOpen}
           hasTheftLocation={hasTheftLocation}
           hasFinalLocation={hasFinalLocation}
+          hasPerpetratorInfo={hasPerpetratorInfo}
         />
         <NavigationControl position="bottom-right" />
 
@@ -667,6 +764,16 @@ function MapComponent() {
           />
         </>
       )}
+
+      <PerpetratorInformationDialog
+        isOpen={isPerpetratorDialogOpen}
+        onClose={() => {
+          console.log('Closing perpetrator information dialog');
+          setIsPerpetratorDialogOpen(false);
+        }}
+        onSave={handlePerpetratorInfoSave}
+        initialData={perpetratorInfo}
+      />
     </>
   );
 }
