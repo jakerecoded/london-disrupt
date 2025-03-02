@@ -105,6 +105,19 @@
   background-color: rgba(40, 55, 70, 0.5);
 }
 
+.incidentDropdownIconActive {
+  background-color: rgba(40, 55, 70, 0.5);
+}
+
+.incidentDropdownItem {
+  transition: background-color 100ms ease;
+  cursor: pointer;
+}
+
+.incidentDropdownItem:hover {
+  background-color: rgba(40, 55, 70, 0.8);
+}
+
 .incidentTitleDisplay:hover {
   background-color: rgba(40, 55, 70, 0.5);
 }

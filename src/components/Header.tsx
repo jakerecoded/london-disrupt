@@ -15,7 +15,8 @@ import { useDisclosure } from '@mantine/hooks';
 import AuthDialog from './AuthDialog';
 import { supabase } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
-import { getIncidentTitle, updateIncidentTitle } from '../services/theftService';
+import { getIncidentTitle, updateIncidentTitle, loadUserIncidents } from '../services/theftService';
+import { TheftIncident } from '../types/theft';
 import classes from './Header.module.css';
 
 const tabs = ['Home', 'Analytics'];
@@ -136,12 +137,14 @@ function Header() {
 
 // Editable Incident Title Component
 function IncidentTitle() {
-  const { currentIncidentId } = useIncident();
+  const { currentIncidentId, setCurrentIncidentId } = useIncident();
   const [incidentTitle, setIncidentTitle] = useState<string>("Untitled Incident");
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>(incidentTitle);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [dropdownOpened, setDropdownOpened] = useState<boolean>(false);
+  const [userIncidents, setUserIncidents] = useState<TheftIncident[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   
   // Fetch the incident title when the incident ID changes
@@ -164,6 +167,20 @@ function IncidentTitle() {
     
     fetchIncidentTitle();
   }, [currentIncidentId]);
+
+  // Fetch all user incidents
+  useEffect(() => {
+    const fetchUserIncidents = async () => {
+      try {
+        const incidents = await loadUserIncidents();
+        setUserIncidents(incidents);
+      } catch (error) {
+        console.error('Error fetching user incidents:', error);
+      }
+    };
+    
+    fetchUserIncidents();
+  }, []);
 
   // Focus the input when entering edit mode
   useEffect(() => {
@@ -225,6 +242,14 @@ function IncidentTitle() {
     }
   };
 
+  // Handle incident selection
+  const handleIncidentSelect = (incidentId: string) => {
+    if (incidentId !== currentIncidentId) {
+      setCurrentIncidentId(incidentId);
+    }
+    setDropdownOpened(false);
+  };
+
   return (
     <div className={classes.incidentTitleContainer}>
       {isLoading ? (
@@ -248,9 +273,49 @@ function IncidentTitle() {
               {incidentTitle}
             </Text>
           </div>
-          <div className={classes.incidentDropdownIcon}>
-            <IconChevronDown size={16} stroke={1.5} color="white" />
-          </div>
+          <Menu
+            width={300}
+            position="bottom"
+            transitionProps={{ transition: 'pop-top-right' }}
+            onClose={() => setDropdownOpened(false)}
+            onOpen={() => setDropdownOpened(true)}
+            opened={dropdownOpened}
+            styles={{ 
+              dropdown: { 
+                background: "linear-gradient(90deg, rgba(22,35,46,1) 0%, rgba(21,26,29,1) 100%)", 
+                border: "1px solid #1c94d8" 
+              },
+              item: { 
+                cursor: 'pointer',
+                '&:hover': { backgroundColor: 'rgba(40, 55, 70, 0.1)' }
+              }
+            }}
+            withinPortal
+          >
+            <Menu.Target>
+              <div 
+                className={`${classes.incidentDropdownIcon} ${dropdownOpened ? classes.incidentDropdownIconActive : ''}`}
+              >
+                <IconChevronDown size={16} stroke={1.5} color="white" />
+              </div>
+            </Menu.Target>
+            <Menu.Dropdown>
+              {userIncidents.map((incident) => (
+                <Menu.Item
+                  key={incident.id}
+                  onClick={() => handleIncidentSelect(incident.id!)}
+                >
+                  <Text 
+                    size="xl" 
+                    fw={incident.id === currentIncidentId ? 700 : 400} 
+                    c="#1c94d8"
+                  >
+                    {incident.incident_title}
+                  </Text>
+                </Menu.Item>
+              ))}
+            </Menu.Dropdown>
+          </Menu>
         </div>
       )}
       {error && (
