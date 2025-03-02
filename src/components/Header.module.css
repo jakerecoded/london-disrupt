@@ -75,6 +75,11 @@
   justify-content: center;
 }
 
+.incidentTitleWrapper {
+  display: flex;
+  align-items: center;
+}
+
 .incidentTitleDisplay {
   display: flex;
   align-items: center;
@@ -83,6 +88,21 @@
   padding: 6px 12px;
   border-radius: var(--mantine-radius-sm);
   transition: background-color 100ms ease;
+}
+
+.incidentDropdownIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 100ms ease;
+}
+
+.incidentDropdownIcon:hover {
+  background-color: rgba(40, 55, 70, 0.5);
 }
 
 .incidentTitleDisplay:hover {

@@ -241,11 +241,16 @@ function IncidentTitle() {
           maxLength={50}
         />
       ) : (
-        <div className={classes.incidentTitleDisplay} onClick={handleStartEdit}>
-          <Text size="xl" fw={400} c="white">
-            {incidentTitle}
-          </Text>
-          <IconEdit size={16} className={classes.editIcon} />
+        <div className={classes.incidentTitleWrapper}>
+          <div className={classes.incidentTitleDisplay} onClick={handleStartEdit}>
+            <IconEdit size={16} className={classes.editIcon} />
+            <Text size="xl" fw={400} c="white">
+              {incidentTitle}
+            </Text>
+          </div>
+          <div className={classes.incidentDropdownIcon}>
+            <IconChevronDown size={16} stroke={1.5} color="white" />
+          </div>
         </div>
       )}
       {error && (
