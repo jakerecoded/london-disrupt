@@ -65,7 +65,9 @@ interface MapToolbarProps {
   onStartPathDrawing: () => void;
   onAddFinalLocation?: () => void;
   onAddPerpetratorInfo?: () => void;
+  onStartNewIncident?: () => void;
   isAddingPerpetratorInfo?: boolean;
+  isNewIncidentDialogOpen?: boolean;
   hasTheftLocation?: boolean;
   hasFinalLocation?: boolean;
   hasPerpetratorInfo?: boolean;
@@ -81,7 +83,9 @@ function MapToolbar({
   onStartPathDrawing, 
   onAddFinalLocation,
   onAddPerpetratorInfo,
+  onStartNewIncident,
   isAddingPerpetratorInfo = false,
+  isNewIncidentDialogOpen = false,
   hasTheftLocation,
   hasFinalLocation,
   hasPerpetratorInfo = false
@@ -90,10 +94,13 @@ function MapToolbar({
 
   useEffect(() => {
     // Reset active state when all action modes are inactive
-    if (!isAddingLocation && !isAddingStopLocation && !isAddingFinalLocation && !isDrawingPath && !isAddingPerpetratorInfo) {
+    if (!isAddingLocation && !isAddingStopLocation && !isAddingFinalLocation && !isDrawingPath && !isAddingPerpetratorInfo && !isNewIncidentDialogOpen) {
       setActive(null);
+    } else if (isNewIncidentDialogOpen) {
+      // Set active state to the "Start a different incident timeline" button when dialog is open
+      setActive(5);
     }
-  }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath, isAddingPerpetratorInfo]);
+  }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath, isAddingPerpetratorInfo, isNewIncidentDialogOpen]);
 
   const handleClick = (index: number) => {
     // If clicking the same button that's active, deactivate it
@@ -108,6 +115,9 @@ function MapToolbar({
         onAddLocation(-1); // Deactivation signal
       } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
         onAddFinalLocation(); // Toggle off
+      } else if (index === 5 && onStartNewIncident) {
+        // If the new incident dialog is already open, this will close it
+        onStartNewIncident();
       }
       return;
     }
@@ -132,11 +142,13 @@ function MapToolbar({
       onStartPathDrawing();
     } else if (index === 2 && hasActiveIncident) {
       onAddLocation(index);
-      } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
-        onAddFinalLocation();
-      } else if (index === 4 && hasActiveIncident && onAddPerpetratorInfo) {
-        onAddPerpetratorInfo();
-      }
+    } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
+      onAddFinalLocation();
+    } else if (index === 4 && hasActiveIncident && onAddPerpetratorInfo) {
+      onAddPerpetratorInfo();
+    } else if (index === 5 && onStartNewIncident) {
+      onStartNewIncident();
+    }
     setActive(index);
   };
 
@@ -151,7 +163,8 @@ function MapToolbar({
           {...item}
           active={
             index === active || 
-            (index === 4 && hasPerpetratorInfo) // Show perpetrator info button as active if info exists
+            (index === 4 && hasPerpetratorInfo) || // Show perpetrator info button as active if info exists
+            (index === 5 && isNewIncidentDialogOpen) // Show new incident button as active when dialog is open
           }
           isLoggedOut={isLoggedOut}
           disabled={

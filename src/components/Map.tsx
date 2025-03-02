@@ -9,6 +9,7 @@ import TheftDetailsDialog from './TheftDetailsDialog';
 import StopLocationDialog from './StopLocationDialog';
 import FinalLocationDialog from './FinalLocationDialog';
 import PerpetratorInformationDialog from './PerpetratorInformationDialog';
+import NewIncidentDialog from './NewIncidentDialog';
 import { InitialTheftReport, TimelineMarker, PathPoint } from '../types/theft';
 import { 
   createTheftReport, 
@@ -51,6 +52,7 @@ function MapComponent() {
   const [markerToDelete, setMarkerToDelete] = useState<TimelineMarker | null>(null);
   const [isDeleteInitialDialogOpen, setIsDeleteInitialDialogOpen] = useState(false);
   const [isPerpetratorDialogOpen, setIsPerpetratorDialogOpen] = useState(false);
+  const [isNewIncidentDialogOpen, setIsNewIncidentDialogOpen] = useState(false);
   const [perpetratorInfo, setPerpetratorInfo] = useState({
     vehicleInformation: '',
     clothingInformation: '',
@@ -522,7 +524,9 @@ function MapComponent() {
           onStartPathDrawing={() => setIsDrawingPath(!isDrawingPath)}
           onAddFinalLocation={() => setIsAddingFinalLocation(!isAddingFinalLocation)}
           onAddPerpetratorInfo={() => setIsPerpetratorDialogOpen(true)}
+          onStartNewIncident={() => setIsNewIncidentDialogOpen(true)}
           isAddingPerpetratorInfo={isPerpetratorDialogOpen}
+          isNewIncidentDialogOpen={isNewIncidentDialogOpen}
           hasTheftLocation={hasTheftLocation}
           hasFinalLocation={hasFinalLocation}
           hasPerpetratorInfo={hasPerpetratorInfo}
@@ -773,6 +777,18 @@ function MapComponent() {
         }}
         onSave={handlePerpetratorInfoSave}
         initialData={perpetratorInfo}
+      />
+
+      <NewIncidentDialog
+        isOpen={isNewIncidentDialogOpen}
+        onClose={() => {
+          console.log('Closing new incident dialog');
+          setIsNewIncidentDialogOpen(false);
+        }}
+        onConfirm={() => {
+          console.log('New incident button clicked - functionality to be implemented in next ticket');
+          setIsNewIncidentDialogOpen(false);
+        }}
       />
     </>
   );
