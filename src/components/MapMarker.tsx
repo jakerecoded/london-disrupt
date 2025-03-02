@@ -46,8 +46,15 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
     }
     showTimeoutRef.current = setTimeout(() => {
       setShowPopup(true);
-      if (onClick) onClick();
     }, 300); // 0.3s delay before showing
+  };
+
+  const handleClick = () => {
+    console.log('Marker clicked:', marker);
+    if (onClick) {
+      console.log('Calling onClick handler for marker');
+      onClick();
+    }
   };
 
   const handleMouseLeave = () => {
@@ -120,6 +127,7 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
             className="w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm cursor-pointer"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            onClick={handleClick}
           />
         </Marker>
         {showPopup && (
@@ -155,6 +163,7 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
           className={`w-9 h-9 ${style.bgColor} rounded-full cursor-pointer`}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          onClick={handleClick}
         >
           <FontAwesomeIcon 
             icon={style.icon} 

@@ -6,11 +6,12 @@ import { supabase } from '../lib/supabase';
 
 interface PathDrawerProps {
   isActive: boolean;
+  incidentId: string | null; // Add incidentId prop
   onPathComplete: (points: PathPoint[]) => void;
   onCancel: () => void;
 }
 
-export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathDrawerProps) {
+export default function PathDrawer({ isActive, incidentId, onPathComplete, onCancel }: PathDrawerProps) {
   const [points, setPoints] = useState<PathPoint[]>([]);
   const [isSelectingStart, setIsSelectingStart] = useState(true);
   const [lastEntryOrder, setLastEntryOrder] = useState<number | null>(null);
@@ -61,10 +62,11 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [isActive, onPathComplete, onCancel, resetState]);
 
-  // Define methods that will be exposed to parent
-  const methods = useRef({
+  // Create a mutable object to store methods
+  const methodsObj = useRef({
+    currentIncidentId: incidentId,
     addPathPoint: (latitude: number, longitude: number) => {
-      if (stateRef.current.isSelectingStart) return;
+      if (stateRef.current.isSelectingStart || !methodsObj.current.currentIncidentId) return;
 
       const nextEntryOrder = stateRef.current.points.length > 0 
         ? stateRef.current.points[stateRef.current.points.length - 1].entry_order + 1 
@@ -79,20 +81,33 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
       setPoints(prevPoints => [...prevPoints, newPoint]);
     },
     handleStartMarkerSelect: async (marker: TimelineMarker) => {
-      if (!stateRef.current.isSelectingStart) return;
+      console.log('handleStartMarkerSelect called with marker:', marker);
+      console.log('Current state:', {
+        isSelectingStart: stateRef.current.isSelectingStart,
+        incidentId: methodsObj.current.currentIncidentId,
+        pointsCount: stateRef.current.points.length
+      });
+      
+      if (!stateRef.current.isSelectingStart || !methodsObj.current.currentIncidentId) {
+        console.log('Exiting handleStartMarkerSelect early - conditions not met:', {
+          isSelectingStart: stateRef.current.isSelectingStart,
+          hasIncidentId: !!methodsObj.current.currentIncidentId
+        });
+        return;
+      }
       
       console.log('Start marker selected:', marker);
       
       try {
-        // Get the incident_id from the marker
-        const incidentId = marker.id.split('-')[0]; // Assuming the ID format includes the incident ID
-        console.log('Using incident ID for path:', incidentId);
+        // Use the stored incidentId
+        const currentId = methodsObj.current.currentIncidentId;
+        console.log('Using incident ID for path:', currentId);
         
         // Get the highest entry_order for this specific incident
         const { data, error } = await supabase
           .from('phone_theft_timeline_entries')
           .select('entry_order')
-          .eq('incident_id', incidentId)
+          .eq('incident_id', currentId)
           .order('entry_order', { ascending: false })
           .limit(1);
           
@@ -123,21 +138,42 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
     },
     isSelectingStart: () => stateRef.current.isSelectingStart
   });
-
+  
+  // Update the incidentId in the methods object when it changes
+  useEffect(() => {
+    console.log('Updating incidentId in methods object:', incidentId);
+    methodsObj.current.currentIncidentId = incidentId;
+  }, [incidentId]);
+  
   // Expose methods to window when component is active
   useEffect(() => {
     if (isActive) {
-      window.pathDrawerMethods = methods.current;
+      console.log('PathDrawer activated with incidentId:', incidentId);
+      console.log('Exposing methods to window with currentIncidentId:', methodsObj.current.currentIncidentId);
+      window.pathDrawerMethods = methodsObj.current;
     }
     return () => {
-      if (window.pathDrawerMethods === methods.current) {
+      if (window.pathDrawerMethods === methodsObj.current) {
+        console.log('PathDrawer deactivated, cleaning up methods');
         delete window.pathDrawerMethods;
       }
     };
-  }, [isActive]);
+  }, [isActive, incidentId]);
+
+  // Debug effect to log state changes
+  useEffect(() => {
+    console.log('PathDrawer state updated:', {
+      isActive,
+      incidentId,
+      isSelectingStart,
+      pointsCount: points.length,
+      lastEntryOrder
+    });
+  }, [isActive, incidentId, isSelectingStart, points.length, lastEntryOrder]);
 
   return (
     <>
+      {/* Draw the path line if there are at least 2 points */}
       {points.length > 1 && (
         <Source
           type="geojson"
@@ -157,6 +193,37 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
               'line-color': '#4a90e2',
               'line-width': 3,
               'line-dasharray': [3, 3]
+            }}
+          />
+        </Source>
+      )}
+      
+      {/* Draw points as circles */}
+      {points.length > 0 && (
+        <Source
+          type="geojson"
+          data={{
+            type: 'FeatureCollection',
+            features: points.map((p, index) => ({
+              type: 'Feature',
+              properties: {
+                index
+              },
+              geometry: {
+                type: 'Point',
+                coordinates: [p.longitude, p.latitude]
+              }
+            }))
+          }}
+        >
+          <Layer
+            id="path-points-layer"
+            type="circle"
+            paint={{
+              'circle-radius': 5,
+              'circle-color': '#4a90e2',
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#ffffff'
             }}
           />
         </Source>

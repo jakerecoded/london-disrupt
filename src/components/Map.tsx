@@ -299,8 +299,19 @@ export default function MapComponent() {
     if (isDrawingPath && currentIncidentId && window.pathDrawerMethods?.addPathPoint) {
       const isSelecting = window.pathDrawerMethods.isSelectingStart();
       
+      console.log('Path drawing state:', {
+        isDrawingPath,
+        currentIncidentId,
+        isSelectingStart: isSelecting,
+        hasPathDrawerMethods: !!window.pathDrawerMethods,
+        clickCoordinates: [event.lngLat.lat, event.lngLat.lng]
+      });
+      
       if (!isSelecting) {
+        console.log('Adding path point at:', [event.lngLat.lat, event.lngLat.lng]);
         window.pathDrawerMethods.addPathPoint(event.lngLat.lat, event.lngLat.lng);
+      } else {
+        console.log('Not adding path point because isSelectingStart is true. Select a marker first.');
       }
     }
   }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath, currentIncidentId]);
@@ -506,6 +517,21 @@ export default function MapComponent() {
       if (!hasTheftLocation) {
         console.log('Activating add theft location mode');
         setIsAddingLocation(!isAddingLocation);
+      }
+    } else if (index === 1 && currentIncidentId) {
+      // Path drawing - only allow if we have an active incident
+      console.log('Toggling path drawing mode');
+      const newIsDrawingPath = !isDrawingPath;
+      setIsDrawingPath(newIsDrawingPath);
+      
+      if (newIsDrawingPath) {
+        // Show notification to inform user about path drawing process
+        notifications.show({
+          title: 'Path Drawing Mode',
+          message: 'First click on a marker to start the path, then click on the map to add points. Press Enter when done.',
+          color: 'blue',
+          autoClose: 8000,
+        });
       }
     } else if (index === 2 && currentIncidentId) {
       // Stop location - only allow if we have an active incident
@@ -721,9 +747,16 @@ export default function MapComponent() {
 
         <PathDrawer
           isActive={isDrawingPath}
+          incidentId={currentIncidentId}
           onPathComplete={handlePathComplete}
           onCancel={() => setIsDrawingPath(false)}
         />
+
+        {isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.() && (
+          <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-10">
+            Click on a marker to start the path
+          </div>
+        )}
 
         {isLoading && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
