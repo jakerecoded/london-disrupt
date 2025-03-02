@@ -11,6 +11,7 @@ import {
   Text,
   UnstyledButton,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import AuthDialog from './AuthDialog';
 import { supabase } from '../lib/supabase';
@@ -246,6 +247,14 @@ function IncidentTitle() {
   const handleIncidentSelect = (incidentId: string) => {
     if (incidentId !== currentIncidentId) {
       setCurrentIncidentId(incidentId);
+      
+      // Add notification for incident switch
+      notifications.show({
+        title: 'Incident Switched',
+        message: 'Successfully switched to different incident',
+        color: 'blue',
+        autoClose: 3000,
+      });
     }
     setDropdownOpened(false);
   };
