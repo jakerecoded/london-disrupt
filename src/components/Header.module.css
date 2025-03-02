@@ -64,3 +64,55 @@
   border-color: var(--mantine-color-dark-7);
   border-bottom-color: transparent;
 }
+
+/* Incident Title Styles */
+.incidentTitleContainer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.incidentTitleDisplay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 100ms ease;
+}
+
+.incidentTitleDisplay:hover {
+  background-color: rgba(40, 55, 70, 0.5);
+}
+
+.editIcon {
+  opacity: 0;
+  color: var(--mantine-color-blue-4);
+  transition: opacity 100ms ease;
+}
+
+.incidentTitleDisplay:hover .editIcon {
+  opacity: 0.7;
+}
+
+.incidentTitleInput {
+  background-color: #283746;
+  color: white;
+  border: none;
+  border-radius: var(--mantine-radius-sm);
+  padding: 6px 12px;
+  font-size: var(--mantine-font-size-xl);
+  font-weight: 400;
+  outline: none;
+  width: 300px;
+  max-width: 100%;
+  box-shadow: 0 0 0 1px #1c94d8;
+}
+
+.incidentTitleInput:focus {
+  box-shadow: 0 0 0 2px #1c94d8;
+}

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { IconChevronDown, IconLogout } from '@tabler/icons-react';
+import { useState, useRef, useEffect } from 'react';
+import { IconChevronDown, IconLogout, IconEdit } from '@tabler/icons-react';
 import {
   Avatar,
   Burger,
@@ -13,7 +13,6 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import AuthDialog from './AuthDialog';
 import { supabase } from '../lib/supabase';
-import { useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import classes from './Header.module.css';
 
@@ -54,6 +53,8 @@ function Header() {
       <Container className={classes.mainSection} size="xl">
         <Group justify="space-between">
           <Text className={classes.title} c="black" size="xl" fw={900} variant="gradient" gradient={{ from: 'cyan', to: 'blue', deg: 72 }}>snatchback.London</Text>
+
+          <IncidentTitle />
 
           <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
 
@@ -127,6 +128,82 @@ function Header() {
         isOpen={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)} 
       />
+    </div>
+  );
+}
+
+// Editable Incident Title Component
+function IncidentTitle() {
+  const [incidentTitle, setIncidentTitle] = useState<string>("Untitled Incident 1");
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState<string>(incidentTitle);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the input when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  // Handle starting edit mode
+  const handleStartEdit = () => {
+    setInputValue(incidentTitle);
+    setIsEditing(true);
+  };
+
+  // Handle saving the title
+  const handleSave = () => {
+    // Validate: only letters, numbers, and spaces, max 50 chars
+    const validatedTitle = inputValue.trim();
+    if (validatedTitle && /^[A-Za-z0-9 ]{1,50}$/.test(validatedTitle)) {
+      setIncidentTitle(validatedTitle);
+    } else {
+      // If invalid, revert to previous title
+      setInputValue(incidentTitle);
+    }
+    setIsEditing(false);
+  };
+
+  // Handle input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow letters, numbers, and spaces
+    const value = e.target.value.replace(/[^A-Za-z0-9 ]/g, '');
+    // Limit to 50 characters
+    setInputValue(value.slice(0, 50));
+  };
+
+  // Handle key press events (Enter to save, Escape to cancel)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setInputValue(incidentTitle);
+    }
+  };
+
+  return (
+    <div className={classes.incidentTitleContainer}>
+      {isEditing ? (
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={handleChange}
+          onBlur={handleSave}
+          onKeyDown={handleKeyDown}
+          className={classes.incidentTitleInput}
+          maxLength={50}
+        />
+      ) : (
+        <div className={classes.incidentTitleDisplay} onClick={handleStartEdit}>
+          <Text size="xl" fw={400} c="white">
+            {incidentTitle}
+          </Text>
+          <IconEdit size={16} className={classes.editIcon} />
+        </div>
+      )}
     </div>
   );
 }
