@@ -81,10 +81,18 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
     handleStartMarkerSelect: async (marker: TimelineMarker) => {
       if (!stateRef.current.isSelectingStart) return;
       
+      console.log('Start marker selected:', marker);
+      
       try {
+        // Get the incident_id from the marker
+        const incidentId = marker.id.split('-')[0]; // Assuming the ID format includes the incident ID
+        console.log('Using incident ID for path:', incidentId);
+        
+        // Get the highest entry_order for this specific incident
         const { data, error } = await supabase
           .from('phone_theft_timeline_entries')
           .select('entry_order')
+          .eq('incident_id', incidentId)
           .order('entry_order', { ascending: false })
           .limit(1);
           
@@ -94,6 +102,7 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
         }
         
         const nextEntryOrder = data?.[0]?.entry_order ? data[0].entry_order + 1 : 1;
+        console.log('Next entry order will be:', nextEntryOrder);
         setLastEntryOrder(nextEntryOrder);
         
         setIsSelectingStart(false);
@@ -102,6 +111,12 @@ export default function PathDrawer({ isActive, onPathComplete, onCancel }: PathD
           longitude: marker.longitude,
           entry_order: nextEntryOrder
         }]);
+        
+        console.log('Path drawing started from marker:', {
+          latitude: marker.latitude,
+          longitude: marker.longitude,
+          entry_order: nextEntryOrder
+        });
       } catch (error) {
         console.error('Error in handleStartMarkerSelect:', error);
       }

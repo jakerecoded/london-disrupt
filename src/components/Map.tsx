@@ -244,6 +244,16 @@ export default function MapComponent() {
   };
 
   const handleMapClick = useCallback((event: MapLayerMouseEvent) => {
+    // Log the current state for debugging
+    console.log('Map clicked with state:', {
+      isAddingLocation,
+      isAddingStopLocation,
+      isAddingFinalLocation,
+      isDrawingPath,
+      currentIncidentId,
+      hasActiveIncident: !!currentIncidentId
+    });
+    
     if (isAddingLocation) {
       console.log('Map clicked at:', event.lngLat);
       
@@ -258,7 +268,7 @@ export default function MapComponent() {
       return;
     }
 
-    if (isAddingStopLocation) {
+    if (isAddingStopLocation && currentIncidentId) {
       console.log('Adding stop location at:', event.lngLat);
       
       const newLocation = {
@@ -272,7 +282,7 @@ export default function MapComponent() {
       return;
     }
 
-    if (isAddingFinalLocation) {
+    if (isAddingFinalLocation && currentIncidentId) {
       console.log('Adding final location at:', event.lngLat);
       
       const newLocation = {
@@ -286,19 +296,26 @@ export default function MapComponent() {
       return;
     }
 
-    if (isDrawingPath && window.pathDrawerMethods?.addPathPoint) {
+    if (isDrawingPath && currentIncidentId && window.pathDrawerMethods?.addPathPoint) {
       const isSelecting = window.pathDrawerMethods.isSelectingStart();
       
       if (!isSelecting) {
         window.pathDrawerMethods.addPathPoint(event.lngLat.lat, event.lngLat.lng);
       }
     }
-  }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath]);
+  }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath, currentIncidentId]);
 
   const handlePathComplete = async (points: PathPoint[]) => {
     try {
       setIsLoading(true);
       console.log('Saving path points:', points);
+      
+      if (!currentIncidentId) {
+        console.error('No active incident ID when trying to save path points');
+        throw new Error('No active incident');
+      }
+      
+      console.log('Using incident ID for path points:', currentIncidentId);
       
       const { error } = await supabase
         .from('phone_theft_timeline_entries')
@@ -319,7 +336,8 @@ export default function MapComponent() {
       }
 
       // Refresh timeline
-      const timeline = await loadFullTimeline(currentIncidentId!);
+      console.log('Refreshing timeline after adding path points');
+      const timeline = await loadFullTimeline(currentIncidentId);
       setTheftLocations(timeline);
       
     } catch (error) {
@@ -474,7 +492,8 @@ export default function MapComponent() {
   };
 
   const handleToolbarClick = (index: number) => {
-    console.log('Toolbar clicked with index:', index);
+    console.log('Toolbar clicked with index:', index, 'Current incident ID:', currentIncidentId);
+    
     if (index === -1) {
       // Deactivation case
       setIsAddingLocation(false);
@@ -483,11 +502,27 @@ export default function MapComponent() {
     }
     
     if (index === 0) {
-      setIsAddingLocation(!isAddingLocation);
-    } else if (index === 2) {
+      // Initial theft location - only allow if no active incident
+      if (!hasTheftLocation) {
+        console.log('Activating add theft location mode');
+        setIsAddingLocation(!isAddingLocation);
+      }
+    } else if (index === 2 && currentIncidentId) {
+      // Stop location - only allow if we have an active incident
+      console.log('Activating add stop location mode');
       setIsAddingStopLocation(!isAddingStopLocation);
     }
   };
+
+  // Debug effect to log state changes
+  useEffect(() => {
+    console.log('Current state updated:', {
+      currentIncidentId,
+      hasTheftLocation,
+      hasFinalLocation,
+      theftLocationsCount: theftLocations.length
+    });
+  }, [currentIncidentId, hasTheftLocation, hasFinalLocation, theftLocations.length]);
 
   // Animation setup for path lines
   useEffect(() => {

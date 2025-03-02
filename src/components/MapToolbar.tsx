@@ -103,19 +103,31 @@ function MapToolbar({
   }, [isAddingLocation, isAddingStopLocation, isAddingFinalLocation, isDrawingPath, isAddingPerpetratorInfo, isNewIncidentDialogOpen]);
 
   const handleClick = (index: number) => {
+    console.log('MapToolbar button clicked:', {
+      index,
+      active,
+      hasActiveIncident,
+      hasTheftLocation
+    });
+    
     // If clicking the same button that's active, deactivate it
     if (index === active) {
       setActive(null);
       // Call appropriate handler with false to deactivate
-      if (index === 0 && !hasActiveIncident) {
+      if (index === 0 && !hasTheftLocation) {
+        console.log('Deactivating add theft location mode');
         onAddLocation(-1); // Deactivation signal
       } else if (index === 1 && hasActiveIncident) {
+        console.log('Toggling path drawing mode off');
         onStartPathDrawing(); // Already handles toggle
       } else if (index === 2 && hasActiveIncident) {
+        console.log('Deactivating add stop location mode');
         onAddLocation(-1); // Deactivation signal
       } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
+        console.log('Toggling add final location mode off');
         onAddFinalLocation(); // Toggle off
       } else if (index === 5 && onStartNewIncident) {
+        console.log('Toggling new incident dialog');
         // If the new incident dialog is already open, this will close it
         onStartNewIncident();
       }
@@ -124,7 +136,8 @@ function MapToolbar({
     
     // Deactivate any currently active tool before activating new one
     if (active !== null) {
-      if (active === 0 && !hasActiveIncident) {
+      console.log('Deactivating currently active tool:', active);
+      if (active === 0 && !hasTheftLocation) {
         onAddLocation(-1);
       } else if (active === 1 && hasActiveIncident) {
         onStartPathDrawing();
@@ -136,17 +149,24 @@ function MapToolbar({
     }
     
     // Activate new tool
-    if (index === 0 && !hasActiveIncident) {
+    console.log('Activating new tool:', index);
+    if (index === 0 && !hasTheftLocation) {
+      console.log('Activating add theft location mode');
       onAddLocation(index);
     } else if (index === 1 && hasActiveIncident) {
+      console.log('Activating path drawing mode');
       onStartPathDrawing();
     } else if (index === 2 && hasActiveIncident) {
+      console.log('Activating add stop location mode');
       onAddLocation(index);
     } else if (index === 3 && hasActiveIncident && onAddFinalLocation) {
+      console.log('Activating add final location mode');
       onAddFinalLocation();
     } else if (index === 4 && hasActiveIncident && onAddPerpetratorInfo) {
+      console.log('Opening perpetrator information dialog');
       onAddPerpetratorInfo();
     } else if (index === 5 && onStartNewIncident) {
+      console.log('Opening new incident dialog');
       onStartNewIncident();
     }
     setActive(index);
