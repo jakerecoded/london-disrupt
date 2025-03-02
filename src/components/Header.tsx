@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { IconChevronDown, IconLogout, IconEdit } from '@tabler/icons-react';
+import { useIncident } from '../contexts/IncidentContext';
 import {
   Avatar,
   Burger,
@@ -135,42 +136,13 @@ function Header() {
 
 // Editable Incident Title Component
 function IncidentTitle() {
+  const { currentIncidentId } = useIncident();
   const [incidentTitle, setIncidentTitle] = useState<string>("Untitled Incident");
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>(incidentTitle);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  // Get the current incident ID from Supabase
-  const [currentIncidentId, setCurrentIncidentId] = useState<string | null>(null);
-  
-  // Fetch the current incident ID when the component mounts
-  useEffect(() => {
-    const fetchCurrentIncident = async () => {
-      try {
-        setIsLoading(true);
-        const { data: incidents, error } = await supabase
-          .from('phone_theft_incidents')
-          .select('id')
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (error) throw error;
-
-        if (incidents && incidents.length > 0) {
-          setCurrentIncidentId(incidents[0].id);
-        }
-      } catch (error) {
-        console.error('Error fetching current incident:', error);
-        setError('Failed to load incident');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCurrentIncident();
-  }, []);
   
   // Fetch the incident title when the incident ID changes
   useEffect(() => {

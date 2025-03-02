@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useIncident } from '../contexts/IncidentContext';
 import Map, { NavigationControl, MapRef, Source, Layer } from 'react-map-gl';
 import MapToolbar from './MapToolbar';
 import LocationSearch from './LocationSearch';
@@ -19,14 +20,16 @@ import {
   deleteTimelineEntry,
   savePerpetratorInformation,
   loadPerpetratorInformation,
-  deleteInitialTheftLocation
+  deleteInitialTheftLocation,
+  createNewIncident
 } from '../services/theftService';
+import { notifications } from '@mantine/notifications';
 import { supabase } from '../lib/supabase';
 import PathDrawer from './PathDrawer';
 import DeleteMarkerDialog from './DeleteMarkerDialog';
 import DeleteInitialDialog from './DeleteInitialDialog';
 
-function MapComponent() {
+export default function MapComponent() {
   const { user } = useAuth();
   const mapRef = useRef<MapRef>(null);
   const [viewState, setViewState] = useState({
@@ -39,7 +42,7 @@ function MapComponent() {
   const [isAddingFinalLocation, setIsAddingFinalLocation] = useState(false);
   const [isDrawingPath, setIsDrawingPath] = useState(false);
   const [theftLocations, setTheftLocations] = useState<TimelineMarker[]>([]);
-  const [currentIncidentId, setCurrentIncidentId] = useState<string | null>(null);
+  const { currentIncidentId, setCurrentIncidentId } = useIncident();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isStopLocationDialogOpen, setIsStopLocationDialogOpen] = useState(false);
   const [isFinalLocationDialogOpen, setIsFinalLocationDialogOpen] = useState(false);
@@ -425,6 +428,51 @@ function MapComponent() {
     }
   };
 
+  const handleNewIncidentConfirm = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Create a new incident
+      const newIncidentId = await createNewIncident();
+      
+      // Update state to reflect the new incident
+      setCurrentIncidentId(newIncidentId);
+      setTheftLocations([]); // Clear existing markers
+      
+      // Reset state for a new incident
+      setHasTheftLocation(false);
+      setHasFinalLocation(false);
+      setHasPerpetratorInfo(false);
+      
+      // Close the dialog
+      setIsNewIncidentDialogOpen(false);
+      
+      // Show success notification
+      notifications.show({
+        title: 'Success',
+        message: 'New incident created successfully',
+        color: 'green',
+        autoClose: 8000, // Increased duration to 8 seconds
+      });
+      
+      console.log('Created new incident with ID:', newIncidentId);
+    } catch (error) {
+      console.error('Failed to create new incident:', error);
+      setError('Failed to create new incident');
+      
+      // Show error notification
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to create new incident',
+        color: 'red',
+        autoClose: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleToolbarClick = (index: number) => {
     console.log('Toolbar clicked with index:', index);
     if (index === -1) {
@@ -785,13 +833,8 @@ function MapComponent() {
           console.log('Closing new incident dialog');
           setIsNewIncidentDialogOpen(false);
         }}
-        onConfirm={() => {
-          console.log('New incident button clicked - functionality to be implemented in next ticket');
-          setIsNewIncidentDialogOpen(false);
-        }}
+        onConfirm={handleNewIncidentConfirm}
       />
     </>
   );
 }
-
-export default MapComponent;

@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { InitialTheftReport, TimelineMarker } from '../types/theft';
+import { InitialTheftReport, TimelineMarker, TheftIncident } from '../types/theft';
 
 interface FinalLocationDetails {
     incident_id: string;
@@ -587,6 +587,67 @@ export const updateIncidentTitle = async (incidentId: string, title: string): Pr
         if (error) throw error;
     } catch (error) {
         console.error('Error updating incident title:', error);
+        throw error;
+    }
+};
+
+export const createNewIncident = async (): Promise<string> => {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+            throw new Error('No authenticated user');
+        }
+
+        // Create the incident record with default values
+        // Note: incident_title will be set by Supabase trigger
+        const { data: incident, error: incidentError } = await supabase
+            .from('phone_theft_incidents')
+            .insert({
+                user_id: user.id,
+                reported_to_police: false,
+                time_of_theft: new Date().toISOString(),
+                phone_details: '',
+                victim_details: ''
+                // incident_title is handled by Supabase
+            })
+            .select()
+            .single();
+
+        if (incidentError) {
+            console.error('Error creating new incident:', incidentError);
+            throw incidentError;
+        }
+
+        return incident.id;
+    } catch (error) {
+        console.error('Error creating new incident:', error);
+        throw error;
+    }
+};
+
+export const loadUserIncidents = async (): Promise<TheftIncident[]> => {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+            throw new Error('No authenticated user');
+        }
+
+        const { data, error } = await supabase
+            .from('phone_theft_incidents')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error loading user incidents:', error);
+            throw error;
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Error loading user incidents:', error);
         throw error;
     }
 };
