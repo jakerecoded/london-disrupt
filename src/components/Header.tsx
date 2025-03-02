@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { IconChevronDown, IconLogout, IconEdit } from '@tabler/icons-react';
+import { IconChevronDown, IconLogout, IconEdit, IconSquareRoundedChevronsUpFilled } from '@tabler/icons-react';
 import { useIncident } from '../contexts/IncidentContext';
 import {
   Avatar,
@@ -56,7 +56,13 @@ function Header() {
     <div className={classes.header}>
       <Container className={classes.mainSection} size="xl">
         <Group justify="space-between">
-          <Text className={classes.title} c="black" size="xl" fw={900} variant="gradient" gradient={{ from: 'cyan', to: 'blue', deg: 72 }}>snatchback.London</Text>
+          <Group gap="xs" align="center">
+            <IconSquareRoundedChevronsUpFilled 
+              size={28} 
+              style={{ color: "#1c94d8", stroke: "#1c94d8", fill: "#1c94d8" }}
+            />
+            <Text className={classes.title} c="black" size="xl" fw={900} variant="gradient" gradient={{ from: 'cyan', to: 'blue', deg: 72 }}>snatchback.London</Text>
+          </Group>
 
           <IncidentTitle />
 
