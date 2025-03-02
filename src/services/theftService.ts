@@ -85,7 +85,8 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
                 reported_to_police: report.reportedToPolice,
                 time_of_theft: report.timeOfTheft,
                 phone_details: report.phoneDetails,
-                victim_details: report.victimDetails
+                victim_details: report.victimDetails,
+                incident_title: 'Untitled Incident'
             })
             .select()
             .single();
@@ -556,6 +557,36 @@ export const deleteHoldingLocation = async (entryId: string): Promise<void> => {
         console.log('Successfully deleted holding location');
     } catch (error) {
         console.error('Error deleting holding location:', error);
+        throw error;
+    }
+};
+
+export const getIncidentTitle = async (incidentId: string): Promise<string> => {
+    try {
+        const { data, error } = await supabase
+            .from('phone_theft_incidents')
+            .select('incident_title')
+            .eq('id', incidentId)
+            .single();
+
+        if (error) throw error;
+        return data.incident_title || 'Untitled Incident';
+    } catch (error) {
+        console.error('Error fetching incident title:', error);
+        return 'Untitled Incident';
+    }
+};
+
+export const updateIncidentTitle = async (incidentId: string, title: string): Promise<void> => {
+    try {
+        const { error } = await supabase
+            .from('phone_theft_incidents')
+            .update({ incident_title: title })
+            .eq('id', incidentId);
+
+        if (error) throw error;
+    } catch (error) {
+        console.error('Error updating incident title:', error);
         throw error;
     }
 };

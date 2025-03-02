@@ -24,6 +24,7 @@ export interface TheftIncident {
   updated_at?: string;
   phone_details: string;
   victim_details: string;
+  incident_title: string;
 }
 
 // This matches the phone_theft_timeline_entries table
