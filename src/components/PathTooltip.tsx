@@ -9,7 +9,7 @@ interface PathTooltipProps {
 
 function PathTooltip({ onDelete }: PathTooltipProps) {
   return (
-    <div className={styles.tooltipContainer}>
+    <div className={styles.pathTooltipContainer}>
       {onDelete && (
         <Button 
           color="red" 

@@ -6,6 +6,14 @@
   color: white; /* Match Notification text color */
 }
 
+/* Path tooltip container styling */
+.pathTooltipContainer {
+  width: auto; /* Allow width to be determined by content */
+  padding: 12px;
+  background-color: rgba(22,35,46,1);
+  color: white; /* Match Notification text color */
+}
+
 
 /* Global styles for Mapbox popups - these will be applied globally */
 :global(.mapboxgl-popup-content) {

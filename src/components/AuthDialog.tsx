@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '../lib/supabase';
+import styles from './AuthDialog.module.css';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -22,20 +23,20 @@ function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
   return (
     <dialog 
       ref={dialogRef}
-      className="rounded-lg p-0 backdrop:bg-black/50"
+      className={styles.dialog}
       onClose={onClose}
     >
-      <div className="min-w-[400px]">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-xl font-semibold">Sign in</h2>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Sign in</h2>
           <button 
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className={styles.closeButton}
           >
             ✕
           </button>
         </div>
-        <div className="p-6">
+        <div className={styles.content}>
           <Auth
             supabaseClient={supabase}
             appearance={{
