@@ -1,5 +1,6 @@
 import { Dialog } from '@headlessui/react';
 import { TimelineMarker } from '../types/theft';
+import styles from './DeleteMarkerDialog.module.css';
 
 interface DeleteMarkerDialogProps {
   isOpen: boolean;
@@ -30,30 +31,30 @@ function DeleteMarkerDialog({ isOpen, onClose, onConfirm, marker }: DeleteMarker
     <Dialog
       open={isOpen}
       onClose={onClose}
-      className="fixed inset-0 z-50 overflow-y-auto"
+      className={styles.dialogContainer}
     >
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="fixed inset-0 bg-black opacity-30" />
+      <div className={styles.contentWrapper}>
+        <div className={styles.overlay} />
 
-        <div className="relative bg-white rounded-lg p-6 max-w-md mx-auto">
-          <Dialog.Title className="text-lg font-medium mb-4">
+        <div className={styles.dialogPanel}>
+          <Dialog.Title className={styles.dialogTitle}>
             Delete {getMarkerTypeDisplay()}
           </Dialog.Title>
 
-          <p className="mb-6">
+          <p className={styles.dialogDescription}>
             Are you sure you want to delete this {getMarkerTypeDisplay()}?
             {marker.type === 'PATH' && ' The path will be redrawn to connect the remaining points.'}
           </p>
 
-          <div className="flex justify-end space-x-4">
+          <div className={styles.buttonContainer}>
             <button
-              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              className={styles.cancelButton}
               onClick={onClose}
             >
               Cancel
             </button>
             <button
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              className={styles.confirmButton}
               onClick={onConfirm}
             >
               Delete

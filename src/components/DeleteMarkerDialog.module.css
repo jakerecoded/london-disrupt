@@ -1,0 +1,74 @@
+/* Dialog container */
+.dialogContainer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+/* Dialog content wrapper */
+.contentWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Backdrop overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: black;
+  opacity: 0.3;
+}
+
+/* Dialog panel */
+.dialogPanel {
+  position: relative;
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+/* Dialog title */
+.dialogTitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Dialog description */
+.dialogDescription {
+  margin-bottom: 1.5rem;
+}
+
+/* Button container */
+.buttonContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Cancel button */
+.cancelButton {
+  padding: 0.5rem 1rem;
+  color: #4b5563; /* text-gray-600 */
+}
+
+.cancelButton:hover {
+  color: #1f2937; /* text-gray-800 */
+}
+
+/* Delete button */
+.confirmButton {
+  padding: 0.5rem 1rem;
+  background-color: #ef4444; /* bg-red-500 */
+  color: white;
+  border-radius: 0.25rem;
+}
+
+.confirmButton:hover {
+  background-color: #dc2626; /* hover:bg-red-600 */
+}
