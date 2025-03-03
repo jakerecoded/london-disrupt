@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { IconChevronDown, IconLogout, IconEdit, IconSquareRoundedChevronsUpFilled } from '@tabler/icons-react';
 import { useIncident } from '../contexts/IncidentContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Avatar,
   Burger,
@@ -27,6 +28,8 @@ function Header() {
   const [userMenuOpened, setUserMenuOpened] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Get initial session
@@ -46,11 +49,20 @@ function Header() {
     await supabase.auth.signOut();
   };
 
-  const items = tabs.map((tab) => (
-    <Tabs.Tab value={tab} key={tab} color="white">
-      {tab}
-    </Tabs.Tab>
-  ));
+  const handleTabChange = (value: string | null) => {
+    if (value === 'Home') {
+      navigate('/');
+    } else if (value === 'Analytics') {
+      navigate('/analytics');
+    }
+  };
+
+  // Determine the active tab based on the current location
+  const activeTab = location.pathname === "/" || location.pathname === "" 
+    ? "Home" 
+    : location.pathname.includes("analytics") 
+      ? "Analytics" 
+      : "Home";
 
   return (
     <div className={classes.header}>
@@ -121,7 +133,8 @@ function Header() {
       </Container>
       <Container size="xl">
         <Tabs
-          defaultValue="Home"
+          value={activeTab}
+          onChange={handleTabChange}
           variant="outline"
           visibleFrom="sm"
           classNames={{
@@ -130,7 +143,13 @@ function Header() {
             tab: classes.tab,
           }}
         >
-          <Tabs.List>{items}</Tabs.List>
+          <Tabs.List>
+            {tabs.map((tab) => (
+              <Tabs.Tab value={tab} key={tab} color="white">
+                {tab}
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
         </Tabs>
       </Container>
 
