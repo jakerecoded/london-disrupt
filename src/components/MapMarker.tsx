@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faPersonFallingBurst, faWarehouse, faPhoneSlash } from '@fortawesome/free-solid-svg-icons';
 import MarkerTooltip from './MarkerTooltip';
 import PathTooltip from './PathTooltip';
+// CSS module is imported in MarkerTooltip and PathTooltip components
 
 interface MapMarkerProps {
   marker: TimelineMarker;
@@ -17,18 +18,32 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
   const [showPopup, setShowPopup] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isTooltipHovered, setIsTooltipHovered] = useState(false);
+  const [popupInDOM, setPopupInDOM] = useState(false);
   const showTimeoutRef = useRef<NodeJS.Timeout>();
   const hideTimeoutRef = useRef<NodeJS.Timeout>();
+  const removePopupTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Handle visibility changes with a slight delay to allow for transitions
   useEffect(() => {
     if (showPopup) {
+      // Add popup to DOM first
+      setPopupInDOM(true);
       // Set visible class immediately after popup is mounted
       requestAnimationFrame(() => {
         setIsVisible(true);
       });
     } else {
+      // Start fade out by removing visible class
       setIsVisible(false);
+      
+      // Wait for the transition to complete before removing from DOM
+      if (removePopupTimeoutRef.current) {
+        clearTimeout(removePopupTimeoutRef.current);
+      }
+      
+      removePopupTimeoutRef.current = setTimeout(() => {
+        setPopupInDOM(false);
+      }, 200); // Match the transition duration in CSS (0.2s)
     }
   }, [showPopup]);
 
@@ -37,6 +52,7 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
     return () => {
       if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
       if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+      if (removePopupTimeoutRef.current) clearTimeout(removePopupTimeoutRef.current);
     };
   }, []);
 
@@ -130,7 +146,7 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
             onClick={handleClick}
           />
         </Marker>
-        {showPopup && (
+        {popupInDOM && (
           <Popup
             longitude={marker.longitude}
             latitude={marker.latitude}
@@ -171,7 +187,7 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
           />
         </div>
       </Marker>
-      {showPopup && (
+      {popupInDOM && (
         <Popup
           longitude={marker.longitude}
           latitude={marker.latitude}

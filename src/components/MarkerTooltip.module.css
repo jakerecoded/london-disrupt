@@ -1,0 +1,33 @@
+/* Tooltip container styling */
+.tooltipContainer {
+  width: 12rem;
+  padding: 12px;
+  background-color: rgba(22,35,46,1);
+  color: white; /* Match Notification text color */
+}
+
+
+/* Global styles for Mapbox popups - these will be applied globally */
+:global(.mapboxgl-popup-content) {
+  padding: 0 !important; /* Remove default padding */
+  border-radius: 8px !important; /* Match Mantine's border radius */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06) !important; /* Match Mantine's shadow */
+  overflow: hidden;
+  background-color: rgba(22,35,46,1) !important; /* Match Notification background */
+  border-color: rgba(22,35,46,1) !important; /* Match Notification border */
+}
+
+/* Hide the popup tip (triangle) */
+:global(.mapboxgl-popup-tip) {
+  display: none !important;
+}
+
+/* Override the default popup animation to include fade in and out */
+:global(.mapboxgl-popup) {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out !important;
+}
+
+:global(.mapboxgl-popup.visible) {
+  opacity: 1;
+}

@@ -1,6 +1,8 @@
 import { TimelineMarker } from '../types/theft';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { Text, Button } from '@mantine/core';
+import styles from './MarkerTooltip.module.css';
 
 interface MarkerTooltipProps {
   marker: TimelineMarker;
@@ -9,28 +11,30 @@ interface MarkerTooltipProps {
 
 function MarkerTooltip({ marker, onDelete }: MarkerTooltipProps) {
   return (
-    <div className="px-2 py-1 text-xs w-48">
-      <div className="font-bold mb-1">
+    <div className={styles.tooltipContainer}>
+      <Text fw={700} size="xs" mb={4}>
         {marker.type === 'THEFT' && 'Initial theft location'}
         {marker.type === 'HOLDING' && 'Stop location'}
         {marker.type === 'FINAL' && 'Final location'}
         {marker.type === 'MOVEMENT' && 'Movement point'}
-      </div>
-      <div>Latitude: {marker.latitude.toFixed(2)}</div>
-      <div>Longitude: {marker.longitude.toFixed(2)}</div>
+      </Text>
+      <Text size="xs">Latitude: {marker.latitude.toFixed(2)}</Text>
+      <Text size="xs">Longitude: {marker.longitude.toFixed(2)}</Text>
       {marker.duration_at_location && (
-        <div>Duration: {marker.duration_at_location}</div>
+        <Text size="xs">Duration: {marker.duration_at_location}</Text>
       )}
       {onDelete && (
-        <button 
-          className="mt-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded"
+        <Button 
+          color="red" 
+          size="xs" 
+          mt={8}
           onClick={(e) => {
             e.stopPropagation();
             if (onDelete) onDelete();
           }}
         >
           <FontAwesomeIcon icon={faTrash} />
-        </button>
+        </Button>
       )}
     </div>
   );
