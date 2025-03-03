@@ -9,9 +9,9 @@ interface DeleteMarkerDialogProps {
 }
 
 function DeleteMarkerDialog({ isOpen, onClose, onConfirm, marker }: DeleteMarkerDialogProps) {
-  if (!marker) return null;
-
   const getMarkerTypeDisplay = () => {
+    if (!marker) return 'location';
+    
     switch (marker.type) {
       case 'THEFT':
         return 'initial theft location';
@@ -39,52 +39,52 @@ function DeleteMarkerDialog({ isOpen, onClose, onConfirm, marker }: DeleteMarker
 
   return (
     <Modal
-      opened={isOpen}
+      opened={isOpen && marker !== null}
       onClose={onClose}
       title={`Delete ${getMarkerTypeDisplay()}`}
       styles={modalStyles}
       size="md"
       centered
-      transitionProps={{ 
-        transition: 'slide-up', 
-        duration: 300,
-        timingFunction: 'ease'
-      }}
+      transitionProps={{ transition: 'fade', duration: 300 }}
     >
-      <Text color="white" mb="xl">
-        Are you sure you want to delete this {getMarkerTypeDisplay()}?
-        {marker.type === 'PATH' && ' The path will be redrawn to connect the remaining points.'}
-      </Text>
-      
-      <Group justify="space-between" mt="xl">
-        <Button
-          variant="filled"
-          color="red"
-          onClick={onClose}
-          styles={{
-            root: {
-              backgroundColor: '#ef4444',
-              '&:hover': { backgroundColor: '#dc2626' }
-            },
-            label: { color: 'white' }
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="filled"
-          onClick={onConfirm}
-          styles={{
-            root: {
-              backgroundColor: '#1c94d8',
-              '&:hover': { backgroundColor: '#1a85c3' }
-            },
-            label: { color: 'white' }
-          }}
-        >
-          Delete
-        </Button>
-      </Group>
+      {marker && (
+        <>
+          <Text color="white" mb="xl">
+            Are you sure you want to delete this {getMarkerTypeDisplay()}?
+            {marker.type === 'PATH' && ' The path will be redrawn to connect the remaining points.'}
+          </Text>
+          
+          <Group justify="space-between" mt="xl">
+            <Button
+              variant="filled"
+              color="red"
+              onClick={onClose}
+              styles={{
+                root: {
+                  backgroundColor: '#ef4444',
+                  '&:hover': { backgroundColor: '#dc2626' }
+                },
+                label: { color: 'white' }
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="filled"
+              onClick={onConfirm}
+              styles={{
+                root: {
+                  backgroundColor: '#1c94d8',
+                  '&:hover': { backgroundColor: '#1a85c3' }
+                },
+                label: { color: 'white' }
+              }}
+            >
+              Delete
+            </Button>
+          </Group>
+        </>
+      )}
     </Modal>
   );
 }
