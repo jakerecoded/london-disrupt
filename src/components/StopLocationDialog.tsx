@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from './StopLocationDialog.module.css';
+import { Modal, Button, TextInput, NumberInput, Group, Stack } from '@mantine/core';
 
 interface StopLocationDialogProps {
   isOpen: boolean;
@@ -12,7 +12,22 @@ interface StopLocationDialogProps {
   location: { longitude: number; latitude: number };
 }
 
-const StopLocationDialog = ({ isOpen, onClose, onSubmit, location }: StopLocationDialogProps) => {
+function StopLocationDialog({ isOpen, onClose, onSubmit, location }: StopLocationDialogProps) {
+  // Add global style for calendar icon
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        filter: invert(1) !important;
+        opacity: 1 !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   const [formData, setFormData] = useState({
     timestamp: new Date().toISOString().slice(0, 16), // Format: YYYY-MM-DDThh:mm
     hours: '0',
@@ -48,73 +63,141 @@ const StopLocationDialog = ({ isOpen, onClose, onSubmit, location }: StopLocatio
     onClose();
   };
 
+  // Notification toast-like styling
+  const modalStyles = {
+    root: {},
+    header: { backgroundColor: 'rgba(22,35,46,1)', borderBottom: 'none' },
+    title: { color: 'white', fontWeight: 600 },
+    body: { backgroundColor: 'rgba(22,35,46,1)', padding: '1rem' },
+    close: { color: 'white' },
+    overlay: { backdropFilter: 'blur(3px)', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+    content: { boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)' }
+  };
+
+  // Slightly lighter background for input fields
+  const inputStyles = {
+    input: {
+      backgroundColor: 'rgba(32,45,56,1)',
+      color: 'white',
+      border: '1px solid rgba(42,55,66,1)',
+      '&:focus': {
+        borderColor: '#1c94d8'
+      },
+      '&[type="datetime-local"]': {
+        colorScheme: 'dark', // Additional property to help with dark mode styling
+        '&::-webkit-calendar-picker-indicator': {
+          filter: 'invert(1) brightness(200%) !important', // Makes the calendar icon white with increased brightness
+          cursor: 'pointer'
+        }
+      },
+      '&::-webkit-inner-spin-button, &::-webkit-outer-spin-button, &::-webkit-clear-button': {
+        filter: 'invert(1) brightness(100%) !important'
+      },
+      '&::-ms-clear, &::-ms-reveal': {
+        filter: 'invert(1) brightness(100%) !important'
+      }
+    },
+    label: {
+      color: 'white',
+      fontWeight: 500,
+      marginBottom: '0.5rem'
+    },
+    icon: {
+      color: 'white' // Make input icons white
+    },
+    control: {
+      color: 'white', // Make up/down arrows white
+      borderColor: 'rgba(42,55,66,1)' // Remove white separator by matching border color
+    }
+  };
+
   return (
-    <div className={`${styles.dialogContainer} ${isOpen ? styles.visible : styles.hidden}`}>
-      <div className={styles.overlay} onClick={onClose} />
-      <div className={styles.dialogPanel}>
-        <h2 className={styles.dialogTitle}>Phone Stop Location Details</h2>
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <div>
-              <label className={styles.label}>When did the phone arrive here?</label>
-              <input
-                type="datetime-local"
-                className={styles.input}
-                value={formData.timestamp}
-                onChange={e => setFormData({...formData, timestamp: e.target.value})}
+    <Modal
+      opened={isOpen}
+      onClose={onClose}
+      title="Phone Stop Location Details"
+      styles={modalStyles}
+      size="lg"
+      centered
+      transitionProps={{ transition: 'fade', duration: 300 }}
+    >
+      <form onSubmit={handleSubmit}>
+        <Stack gap="md">
+          <TextInput
+            type="datetime-local"
+            label="When did the phone arrive here?"
+            value={formData.timestamp}
+            onChange={(e) => setFormData({...formData, timestamp: e.target.value})}
+            styles={{
+              ...inputStyles,
+              input: {
+                ...inputStyles.input,
+                '&::-webkit-calendar-picker-indicator': {
+                  filter: 'invert(1) !important',
+                  opacity: '1',
+                  cursor: 'pointer'
+                }
+              }
+            }}
+            required
+          />
+          
+          <Stack gap="xs">
+            <div style={{ color: 'white', fontWeight: 500 }}>How long did the phone stay here?</div>
+            <Group grow>
+              <NumberInput
+                label="Hours"
+                value={formData.hours}
+                onChange={(val) => setFormData({...formData, hours: val?.toString() || '0'})}
+                min={0}
+                styles={inputStyles}
                 required
               />
-            </div>
-            
-            <div>
-              <label className={styles.label}>How long did the phone stay here?</label>
-              <div className={styles.durationContainer}>
-                <div className={styles.durationField}>
-                  <label className={styles.secondaryLabel}>Hours</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className={styles.input}
-                    value={formData.hours}
-                    onChange={e => setFormData({...formData, hours: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className={styles.durationField}>
-                  <label className={styles.secondaryLabel}>Minutes</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    className={styles.input}
-                    value={formData.minutes}
-                    onChange={e => setFormData({...formData, minutes: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.buttonContainer}>
-            <button
-              type="button"
+              <NumberInput
+                label="Minutes"
+                value={formData.minutes}
+                onChange={(val) => setFormData({...formData, minutes: val?.toString() || '0'})}
+                min={0}
+                max={59}
+                styles={inputStyles}
+                required
+              />
+            </Group>
+          </Stack>
+          
+          <Group justify="space-between" mt="xl">
+            <Button
+              variant="filled"
+              color="red"
               onClick={onClose}
-              className={styles.cancelButton}
+              styles={{
+                root: {
+                  backgroundColor: '#ef4444',
+                  '&:hover': { backgroundColor: '#dc2626' }
+                },
+                label: { color: 'white' }
+              }}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="filled"
               type="submit"
-              className={styles.submitButton}
+              styles={{
+                root: {
+                  backgroundColor: '#1c94d8',
+                  '&:hover': { backgroundColor: '#1a85c3' }
+                },
+                label: { color: 'white' }
+              }}
             >
               Submit
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            </Button>
+          </Group>
+        </Stack>
+      </form>
+    </Modal>
   );
-};
+}
 
 export default StopLocationDialog;
