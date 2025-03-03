@@ -3,6 +3,8 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '@mantine/core';
 import styles from './MarkerTooltip.module.css';
 
+// Note: PathTooltip actually uses styles defined in MarkerTooltip.module.css
+
 interface PathTooltipProps {
   onDelete?: () => void;
 }
