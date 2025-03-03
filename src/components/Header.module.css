@@ -48,6 +48,12 @@
   position: relative;
   bottom: -1px;
   color: white !important;
+  margin-right: 20px; /* Added to double the spacing between tabs */
+}
+
+/* Remove margin from the last tab */
+.tab:last-child {
+  margin-right: 0;
 }
 
 .tab::before,

@@ -1,8 +1,7 @@
-import { useRef, useEffect } from 'react';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { Modal } from '@mantine/core';
 import { supabase } from '../lib/supabase';
-import styles from './AuthDialog.module.css';
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -10,34 +9,28 @@ interface AuthDialogProps {
 }
 
 function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      dialogRef.current?.showModal();
-    } else {
-      dialogRef.current?.close();
-    }
-  }, [isOpen]);
+  // Notification toast-like styling (copied from PerpetratorInformationDialog)
+  const modalStyles = {
+    root: {},
+    header: { backgroundColor: 'rgba(22,35,46,1)', borderBottom: 'none' },
+    title: { color: 'white', fontWeight: 600 },
+    body: { backgroundColor: 'rgba(22,35,46,1)', padding: '1rem' },
+    close: { color: 'white' },
+    overlay: { backdropFilter: 'blur(3px)', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+    content: { boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)' }
+  };
 
   return (
-    <dialog 
-      ref={dialogRef}
-      className={styles.dialog}
+    <Modal
+      opened={isOpen}
       onClose={onClose}
+      title="Sign in"
+      styles={modalStyles}
+      size="md"
+      centered
+      transitionProps={{ transition: 'fade', duration: 300 }}
     >
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Sign in</h2>
-          <button 
-            onClick={onClose}
-            className={styles.closeButton}
-          >
-            ✕
-          </button>
-        </div>
-        <div className={styles.content}>
-          <Auth
+      <Auth
             supabaseClient={supabase}
             appearance={{
               theme: ThemeSupa,
@@ -56,9 +49,7 @@ function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
             providers={[]}
             redirectTo={"https://studious-train-x59p46rgvg7phpvg9-5173.app.github.dev"}
           />
-        </div>
-      </div>
-    </dialog>
+    </Modal>
   );
 }
 
