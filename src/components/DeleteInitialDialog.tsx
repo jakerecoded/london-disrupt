@@ -1,6 +1,7 @@
 import { Dialog } from '@headlessui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import styles from './DeleteInitialDialog.module.css';
 
 interface DeleteInitialDialogProps {
   isOpen: boolean;
@@ -13,32 +14,32 @@ function DeleteInitialDialog({ isOpen, onClose, onConfirm }: DeleteInitialDialog
     <Dialog
       open={isOpen}
       onClose={onClose}
-      className="fixed inset-0 z-50 overflow-y-auto"
+      className={styles.dialogContainer}
     >
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="fixed inset-0 bg-black opacity-30" />
+      <div className={styles.contentWrapper}>
+        <div className={styles.overlay} />
         
-        <div className="relative bg-white rounded-lg p-6 max-w-md mx-auto">
-          <div className="flex items-center mb-4 text-red-500">
-            <FontAwesomeIcon icon={faExclamationTriangle} className="text-2xl mr-2" />
-            <Dialog.Title className="text-lg font-bold">Delete Initial Theft Location</Dialog.Title>
+        <div className={styles.dialogPanel}>
+          <div className={styles.headerContainer}>
+            <FontAwesomeIcon icon={faExclamationTriangle} className={styles.warningIcon} />
+            <Dialog.Title className={styles.dialogTitle}>Delete Initial Theft Location</Dialog.Title>
           </div>
 
-          <Dialog.Description className="mb-6 text-gray-600">
+          <Dialog.Description className={styles.dialogDescription}>
             Warning: Deleting the initial theft location will remove all associated paths and markers. 
             You will need to start from scratch. This action cannot be undone.
           </Dialog.Description>
 
-          <div className="flex justify-end space-x-3">
+          <div className={styles.buttonContainer}>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+              className={styles.cancelButton}
             >
               Cancel
             </button>
             <button
               onClick={onConfirm}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded"
+              className={styles.confirmButton}
             >
               Continue
             </button>
