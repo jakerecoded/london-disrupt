@@ -1,6 +1,10 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Map, { NavigationControl, MapRef } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { loadRoutes } from '../services/routeService';
+import { Route } from '../types/route';
+import RouteDisplay from './RouteDisplay';
+import styles from './RouteDisplay.module.css';
 
 export default function Analytics() {
   const mapRef = useRef<MapRef>(null);
@@ -9,6 +13,35 @@ export default function Analytics() {
     latitude: 51.5072,
     zoom: 12
   });
+  const [routes, setRoutes] = useState<Route[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Fetch routes on component mount and periodically refresh
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      try {
+        setIsLoading(true);
+        const routesData = await loadRoutes();
+        setRoutes(routesData);
+        setError(null);
+      } catch (error) {
+        console.error('Failed to load routes:', error);
+        setError('Failed to load routes');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    // Initial fetch
+    fetchRoutes();
+    
+    // Set up periodic refresh (every 30 seconds)
+    const intervalId = setInterval(fetchRoutes, 30000);
+    
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
   
   return (
     <Map
@@ -20,6 +53,23 @@ export default function Analytics() {
       style={{ width: '100%', height: '100%' }}
     >
       <NavigationControl position="bottom-right" />
+      
+      {/* Render routes */}
+      <RouteDisplay routes={routes} mapRef={mapRef} />
+      
+      {isLoading && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingContent}>
+            Loading routes...
+          </div>
+        </div>
+      )}
+      
+      {error && (
+        <div className={styles.errorMessage}>
+          {error}
+        </div>
+      )}
     </Map>
   );
 }
