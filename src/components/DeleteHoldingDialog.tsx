@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import styles from './DeleteHoldingDialog.module.css';
 
 interface DeleteHoldingDialogProps {
   isOpen: boolean;
@@ -10,54 +11,54 @@ interface DeleteHoldingDialogProps {
 function DeleteHoldingDialog({ isOpen, onClose, onConfirm }: DeleteHoldingDialogProps) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={onClose}>
+      <Dialog as="div" className={styles.dialogContainer} onClose={onClose}>
         <Transition.Child
           as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+          enter={styles.enter}
+          enterFrom={styles.enterFrom}
+          enterTo={styles.enterTo}
+          leave={styles.leave}
+          leaveFrom={styles.leaveFrom}
+          leaveTo={styles.leaveTo}
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className={styles.overlay} />
         </Transition.Child>
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <div className={styles.dialogWrapper}>
+          <div className={styles.dialogContent}>
             <Transition.Child
               as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              enter={styles.panelEnter}
+              enterFrom={styles.panelEnterFrom}
+              enterTo={styles.panelEnterTo}
+              leave={styles.panelLeave}
+              leaveFrom={styles.panelLeaveFrom}
+              leaveTo={styles.panelLeaveTo}
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className={styles.dialogPanel}>
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900"
+                  className={styles.dialogTitle}
                 >
                   Delete Holding Location
                 </Dialog.Title>
-                <div className="mt-2">
-                  <p className="text-sm text-gray-500">
+                <div className={styles.descriptionContainer}>
+                  <p className={styles.descriptionText}>
                     Are you sure you want to delete this holding location?
                   </p>
                 </div>
 
-                <div className="mt-4 flex justify-end space-x-3">
+                <div className={styles.buttonContainer}>
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                    className={styles.cancelButton}
                     onClick={onClose}
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                    className={styles.deleteButton}
                     onClick={onConfirm}
                   >
                     Delete
