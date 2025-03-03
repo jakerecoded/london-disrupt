@@ -76,7 +76,7 @@ function Header() {
             <Text className={classes.title} c="black" size="xl" fw={900} variant="gradient" gradient={{ from: 'cyan', to: 'blue', deg: 72 }}>snatchback.London</Text>
           </Group>
 
-          <IncidentTitle />
+          {activeTab !== "Analytics" && <IncidentTitle />}
 
           <Burger opened={opened} onClick={toggle} hiddenFrom="xs" size="sm" />
 
