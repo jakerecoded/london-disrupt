@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import styles from './StopLocationDialog.module.css';
 
 interface StopLocationDialogProps {
   isOpen: boolean;
@@ -48,17 +49,17 @@ const StopLocationDialog = ({ isOpen, onClose, onSubmit, location }: StopLocatio
   };
 
   return (
-    <div className={`fixed inset-0 ${isOpen ? 'block' : 'hidden'}`}>
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 w-96">
-        <h2 className="text-lg font-bold mb-4">Phone Stop Location Details</h2>
+    <div className={`${styles.dialogContainer} ${isOpen ? styles.visible : styles.hidden}`}>
+      <div className={styles.overlay} onClick={onClose} />
+      <div className={styles.dialogPanel}>
+        <h2 className={styles.dialogTitle}>Phone Stop Location Details</h2>
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
+          <div className={styles.formGroup}>
             <div>
-              <label className="block text-sm font-medium text-gray-700">When did the phone arrive here?</label>
+              <label className={styles.label}>When did the phone arrive here?</label>
               <input
                 type="datetime-local"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                className={styles.input}
                 value={formData.timestamp}
                 onChange={e => setFormData({...formData, timestamp: e.target.value})}
                 required
@@ -66,26 +67,26 @@ const StopLocationDialog = ({ isOpen, onClose, onSubmit, location }: StopLocatio
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">How long did the phone stay here?</label>
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <label className="block text-sm text-gray-500">Hours</label>
+              <label className={styles.label}>How long did the phone stay here?</label>
+              <div className={styles.durationContainer}>
+                <div className={styles.durationField}>
+                  <label className={styles.secondaryLabel}>Hours</label>
                   <input
                     type="number"
                     min="0"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                    className={styles.input}
                     value={formData.hours}
                     onChange={e => setFormData({...formData, hours: e.target.value})}
                     required
                   />
                 </div>
-                <div className="flex-1">
-                  <label className="block text-sm text-gray-500">Minutes</label>
+                <div className={styles.durationField}>
+                  <label className={styles.secondaryLabel}>Minutes</label>
                   <input
                     type="number"
                     min="0"
                     max="59"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                    className={styles.input}
                     value={formData.minutes}
                     onChange={e => setFormData({...formData, minutes: e.target.value})}
                     required
@@ -95,17 +96,17 @@ const StopLocationDialog = ({ isOpen, onClose, onSubmit, location }: StopLocatio
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end space-x-3">
+          <div className={styles.buttonContainer}>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className={styles.cancelButton}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+              className={styles.submitButton}
             >
               Submit
             </button>

@@ -1,0 +1,120 @@
+/* Dialog container */
+.dialogContainer {
+  position: fixed;
+  inset: 0;
+}
+
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Backdrop overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Dialog panel */
+.dialogPanel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  width: 24rem; /* w-96 */
+}
+
+/* Dialog title */
+.dialogTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* Form */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Label */
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151; /* text-gray-700 */
+  margin-bottom: 0.5rem;
+}
+
+/* Secondary label */
+.secondaryLabel {
+  display: block;
+  font-size: 0.875rem;
+  color: #6b7280; /* text-gray-500 */
+}
+
+/* Input */
+.input {
+  margin-top: 0.25rem;
+  display: block;
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+}
+
+/* Duration inputs container */
+.durationContainer {
+  display: flex;
+  gap: 1rem;
+}
+
+.durationField {
+  flex: 1;
+}
+
+/* Button container */
+.buttonContainer {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Cancel button */
+.cancelButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151; /* text-gray-700 */
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: #f3f4f6; /* hover:bg-gray-50 */
+}
+
+/* Submit button */
+.submitButton {
+  padding: 0.5rem 1rem;
+  background-color: #2563eb; /* bg-blue-600 */
+  color: white;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+  background-color: #1d4ed8; /* hover:bg-blue-700 */
+}
