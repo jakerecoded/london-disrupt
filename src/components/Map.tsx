@@ -872,18 +872,19 @@ export default function MapComponent() {
             onSubmit={handleStopLocationSubmit}
             location={tempLocation}
           />
-          <FinalLocationDialog
-            isOpen={isFinalLocationDialogOpen}
-            onClose={() => {
-              console.log('Closing final location dialog');
-              setIsFinalLocationDialogOpen(false);
-              setTempLocation(null);
-            }}
-            onSubmit={handleFinalLocationSubmit}
-            location={tempLocation}
-          />
         </>
       )}
+      
+      <FinalLocationDialog
+        isOpen={isFinalLocationDialogOpen}
+        onClose={() => {
+          console.log('Closing final location dialog');
+          setIsFinalLocationDialogOpen(false);
+          setTempLocation(null);
+        }}
+        onSubmit={handleFinalLocationSubmit}
+        location={tempLocation || undefined}
+      />
 
       <PerpetratorInformationDialog
         isOpen={isPerpetratorDialogOpen}
