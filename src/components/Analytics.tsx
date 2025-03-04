@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import Map, { NavigationControl, MapRef } from 'react-map-gl';
+import { Loader } from '@mantine/core';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { loadRoutes } from '../services/routeService';
 import { Route } from '../types/route';
@@ -59,9 +60,7 @@ export default function Analytics() {
       
       {isLoading && (
         <div className={styles.loadingOverlay}>
-          <div className={styles.loadingContent}>
-            Loading routes...
-          </div>
+          <Loader type="oval" color="blue" size="md" />
         </div>
       )}
       

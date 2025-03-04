@@ -24,6 +24,7 @@ import {
   createNewIncident
 } from '../services/theftService';
 import { notifications } from '@mantine/notifications';
+import { Loader } from '@mantine/core';
 import { supabase } from '../lib/supabase';
 import PathDrawer from './PathDrawer';
 import DeleteMarkerDialog from './DeleteMarkerDialog';
@@ -760,9 +761,7 @@ export default function MapComponent() {
 
         {isLoading && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-            <div className="bg-white p-4 rounded-lg shadow-lg">
-              Loading...
-            </div>
+            <Loader type="oval" color="blue" size="md" />
           </div>
         )}
 
