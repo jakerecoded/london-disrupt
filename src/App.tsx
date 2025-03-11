@@ -46,15 +46,19 @@ function App() {
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route 
-                    path="/" 
+                    path="/home" 
                     element={<ProtectedRoute><Map /></ProtectedRoute>} 
+                  />
+                  <Route 
+                    path="/" 
+                    element={<Navigate to="/home" replace />} 
                   />
                   <Route 
                     path="/analytics" 
                     element={<ProtectedRoute><Analytics /></ProtectedRoute>} 
                   />
                   <Route path="/auth/callback" element={<MagicLinkHandler />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
+                  <Route path="*" element={<Navigate to="/home" replace />} />
                 </Routes>
               </main>
             </div>

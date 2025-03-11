@@ -15,7 +15,7 @@ function LoginPage() {
   // Redirect to home if already authenticated
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/home');
     }
   }, [user, navigate]);
 

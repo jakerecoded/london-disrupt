@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 function MagicLinkHandler() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const handleMagicLink = async () => {
@@ -19,7 +18,7 @@ function MagicLinkHandler() {
         } else if (data.session) {
           // Success! Authenticated session found
           console.log('MagicLinkHandler - Session found:', data.session.user.email);
-          navigate('/', { replace: true });
+          navigate('/home', { replace: true });
           return;
         } 
         
@@ -68,7 +67,7 @@ function MagicLinkHandler() {
           } else {
             console.log('MagicLinkHandler - Session set successfully:', 
                         data.session ? 'valid' : 'invalid');
-            navigate('/', { replace: true });
+            navigate('/home', { replace: true });
           }
         } else {
           console.log('MagicLinkHandler - No tokens found in URL');
