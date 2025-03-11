@@ -92,7 +92,7 @@ function LoginPage() {
             showLinks={false}
             magicLink={true}
             providers={[]}
-            redirectTo={`${window.location.origin}${window.location.pathname}#/auth/callback`}
+            redirectTo={`${window.location.origin}/auth/callback`}
           />
         </div>
       </div>

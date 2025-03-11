@@ -5,7 +5,7 @@ import Map from './components/Map';
 import Analytics from './components/Analytics';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Changed from HashRouter to BrowserRouter
 import { MantineProvider, createTheme } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import '@mantine/core/styles.css';
@@ -37,7 +37,7 @@ function App() {
   return (
     <MantineProvider theme={theme}>
       <Notifications position="bottom-right" />
-      <HashRouter>
+      <BrowserRouter basename="/"> {/* Changed from HashRouter to BrowserRouter */}
         <AuthProvider>
           <IncidentProvider>
             <div className="h-screen flex flex-col">
@@ -53,14 +53,14 @@ function App() {
                     path="/analytics" 
                     element={<ProtectedRoute><Analytics /></ProtectedRoute>} 
                   />
-                  <Route path="*" element={<Navigate to="/" replace />} />
                   <Route path="/auth/callback" element={<MagicLinkHandler />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </main>
             </div>
           </IncidentProvider>
         </AuthProvider>
-      </HashRouter>
+      </BrowserRouter>
     </MantineProvider>
   );
 }
