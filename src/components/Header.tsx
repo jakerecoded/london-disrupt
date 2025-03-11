@@ -23,7 +23,11 @@ import classes from './Header.module.css';
 
 const tabs = ['Home', 'Analytics'];
 
-function Header() {
+interface HeaderProps {
+  onLogout?: () => void;
+}
+
+function Header({ onLogout }: HeaderProps = {}) {
   const [opened, { toggle }] = useDisclosure(false);
   const [userMenuOpened, setUserMenuOpened] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -47,6 +51,10 @@ function Header() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    if (onLogout) {
+      onLogout();
+    }
+    navigate('/login');
   };
 
   const handleTabChange = (value: string | null) => {
@@ -63,6 +71,11 @@ function Header() {
     : location.pathname.includes("analytics") 
       ? "Analytics" 
       : "Home";
+
+  // Hide header on login page
+  if (location.pathname === '/login') {
+    return null;
+  }
 
   return (
     <div className={classes.header}>

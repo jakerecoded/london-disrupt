@@ -14,18 +14,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check active sessions
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
+    const setupAuth = async () => {
+      try {
+        // Check if we have hash parameters from a magic link
+        const hash = window.location.hash;
+        if (hash && hash.includes('access_token=')) {
+          console.log('AuthContext - Found access_token in URL hash, processing...');
+        }
+        
+        // Check active sessions
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        console.log('AuthContext - Initial session check:', session);
+        if (error) {
+          console.error('AuthContext - Error getting session:', error);
+        }
+        
+        setUser(session?.user ?? null);
+        setLoading(false);
+        
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          console.log('AuthContext - Auth state change event:', event);
+          console.log('AuthContext - New session:', session);
+          
+          setUser(session?.user ?? null);
+          
+          // If user just signed in, refresh the page to ensure all components update
+          if (event === 'SIGNED_IN') {
+            console.log('AuthContext - User signed in, updating state');
+            // Force a page reload to ensure all components update
+          }
+        });
+        
+        return () => subscription.unsubscribe();
+      } catch (error) {
+        console.error('AuthContext - Error in auth setup:', error);
+        setLoading(false);
+      }
+    };
+    
+    setupAuth();
   }, []);
 
   return (

@@ -47,7 +47,7 @@ function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
             showLinks={false}
             magicLink={true}
             providers={[]}
-            redirectTo={"https://studious-train-x59p46rgvg7phpvg9-5173.app.github.dev"}
+            redirectTo={window.location.origin}
           />
     </Modal>
   );

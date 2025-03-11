@@ -7,6 +7,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: 'implicit' // Add this to handle magic links better
   },
   db: {
     schema: 'public'
