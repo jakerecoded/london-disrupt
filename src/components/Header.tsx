@@ -54,26 +54,26 @@ function Header({ onLogout }: HeaderProps = {}) {
     if (onLogout) {
       onLogout();
     }
-    navigate('/login');
+    navigate('/');
   };
 
   const handleTabChange = (value: string | null) => {
     if (value === 'Home') {
-      navigate('/');
+      navigate('/home');
     } else if (value === 'Analytics') {
       navigate('/analytics');
     }
   };
 
   // Determine the active tab based on the current location
-  const activeTab = location.pathname === "/" || location.pathname === "" 
+  const activeTab = location.pathname === "/home" || location.pathname === "" 
     ? "Home" 
     : location.pathname.includes("analytics") 
       ? "Analytics" 
       : "Home";
 
-  // Hide header on login page
-  if (location.pathname === '/login') {
+  // Hide header on login page and landing page
+  if (location.pathname === '/login' || location.pathname === '/') {
     return null;
   }
 

@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Map from './components/Map';
 import Analytics from './components/Analytics';
 import LoginPage from './pages/LoginPage';
+import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Changed from HashRouter to BrowserRouter
 import { MantineProvider, createTheme } from '@mantine/core';
@@ -51,14 +52,16 @@ function App() {
                   />
                   <Route 
                     path="/" 
-                    element={<Navigate to="/home" replace />} 
+                    element={
+                      <LandingPage />
+                    } 
                   />
                   <Route 
                     path="/analytics" 
                     element={<ProtectedRoute><Analytics /></ProtectedRoute>} 
                   />
                   <Route path="/auth/callback" element={<MagicLinkHandler />} />
-                  <Route path="*" element={<Navigate to="/home" replace />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </main>
             </div>

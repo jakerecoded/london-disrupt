@@ -1,0 +1,19 @@
+.wrapper {
+  padding-top: calc(var(--mantine-spacing-xl) * 2);
+  padding-bottom: calc(var(--mantine-spacing-xl) * 2);
+  min-height: 650px;
+  background-color: #f8f9fa;
+}
+
+.title {
+  margin-bottom: calc(var(--mantine-spacing-xl) * 1.5);
+  color: #16232e;
+  font-weight: 900;
+}
+
+.item {
+  border-radius: var(--mantine-radius-md);
+  margin-bottom: var(--mantine-spacing-lg);
+  border: 1px solid var(--mantine-color-gray-3);
+  background-color: var(--mantine-color-white);
+}
