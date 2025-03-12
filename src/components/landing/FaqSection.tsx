@@ -26,7 +26,7 @@ const faqItems = [
 
 export function FaqSection() {
   return (
-    <Container className={classes.wrapper}>
+    <Container size="xl" className={classes.wrapper}>
       <Title ta="center" className={classes.title}>
         Frequently Asked Questions
       </Title>

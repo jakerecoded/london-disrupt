@@ -69,7 +69,7 @@ export function FeaturesSection() {
   const features = MOCKDATA.map((feature, index) => <Feature {...feature} key={index} />);
 
   return (
-    <Container className={classes.wrapper}>
+    <Container size="xl" className={classes.wrapper}>
       <Title className={classes.title}>Advanced phone theft tracking for London</Title>
 
       <Container size={560} p={0}>
