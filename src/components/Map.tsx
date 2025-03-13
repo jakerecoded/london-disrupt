@@ -108,9 +108,9 @@ export default function MapComponent() {
       } catch (error) {
         console.error('Error in loadUserIncidents:', error);
         setError('Failed to load user data');
-      } finally {
-        setIsLoading(false);
-      }
+  } finally {
+    setIsLoading(false);
+  }
     };
 
     loadUserIncidents();
@@ -240,7 +240,10 @@ export default function MapComponent() {
       console.error('Failed to save perpetrator information:', error);
       setError('Failed to save perpetrator information');
     } finally {
-      setIsLoading(false);
+      // Add a delay to ensure the modal transition completes before updating state
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 400); // Slightly longer than the transition duration
     }
   };
 
