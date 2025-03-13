@@ -13,33 +13,33 @@ import classes from './FeaturesSection.module.css';
 export const MOCKDATA = [
   {
     icon: faGaugeHigh,
-    title: 'Real-time tracking',
+    title: 'Creating a tracking dataset',
     description:
-      'Track phone theft incidents in real-time with our advanced mapping system. See where and when thefts are occurring to identify patterns and hotspots.',
+      'We cant export location data directly from your device, but by plotting this manually we build up a comprehensive dataset of where stolen phones are moving.',
   },
   {
     icon: faUserShield,
-    title: 'Community alerts',
+    title: 'AI to spot storage locations',
     description:
-      'Get notified when thefts occur in your area. Our community-driven alert system helps you stay informed about local incidents and potential risks.',
+      'When thousands of people in the community add their tracking routes, we integrate with AI to spot common locations where phones are being stored after being stolen.',
   },
   {
     icon: faShieldHalved,
-    title: 'Data privacy',
+    title: 'Supporting police and emergency services',
     description:
-      'Your data is secure with us. We use industry-standard encryption and privacy practices to ensure your personal information remains protected.',
+      'When you report your theft to the police theres no way for them to get this data - but now we can give police and emergency services specific areas to focus on.',
   },
   {
     icon: faLock,
     title: 'Secure reporting',
     description:
-      'Report theft incidents securely through our platform. Your reports help build a comprehensive database of phone thefts across London.',
+      'Report theft incidents securely through our platform, we use encryption at rest and in transit and take precautions to protect your tracking data.',
   },
   {
     icon: faHeadset,
-    title: 'Recovery support',
+    title: 'Free for everyone',
     description:
-      'Get assistance in recovering your stolen phone. Our platform provides resources and guidance to help increase your chances of recovery.',
+      'We built the platform out of frustration at how bad the problem is becoming: the anonymised tracking data and maps will remain free to everyone, forever.',
   },
 ];
 
@@ -70,12 +70,12 @@ export function FeaturesSection() {
 
   return (
     <Container size="xl" className={classes.wrapper}>
-      <Title className={classes.title}>Advanced phone theft tracking for London</Title>
+      <Title className={classes.title}>What does our platform to do help?</Title>
 
       <Container size={560} p={0}>
         <Text size="sm" className={classes.description}>
-          Our platform combines cutting-edge technology with community-driven data to create the most comprehensive
-          phone theft tracking system in London. Join thousands of Londoners protecting their phones.
+          We built snatchback.London as a forever free service to allow people to manually plot where their phone was snatched, the route that you saw it take,
+          where it stopped and was obviously being stored, and where it eventually stopped tracking.
         </Text>
       </Container>
 
