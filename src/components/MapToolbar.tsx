@@ -47,9 +47,9 @@ function ToolbarButton({ icon: Icon, label, active, disabled, isLoggedOut, onCli
 }
 
 const toolbarItems = [
-  { icon: faPersonFallingBurst, label: 'Add Theft Location' },
+  { icon: faPersonFallingBurst, label: 'Add the location where your phone was snatched' },
   { icon: faRoute, label: 'Add the route your phone took' },
-  { icon: faWarehouse, label: 'Add a location where your phone stopped' },
+  { icon: faWarehouse, label: 'Add a location where your phone paused for a while' },
   { icon: faPhoneSlash, label: 'Add the location where your phone stopped tracking' },
   { icon: faUserNinja, label: 'Add some information about who attacked you' },
   { icon: faSquarePlus, label: 'Start a different incident timeline' },
