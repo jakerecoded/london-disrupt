@@ -69,7 +69,10 @@ export const createFinalLocationEntry = async (details: FinalLocationDetails): P
     }
 };
 
-export const createTheftReport = async (report: InitialTheftReport): Promise<TimelineMarker> => {
+export const createTheftReport = async (report: InitialTheftReport): Promise<{
+    marker: TimelineMarker;
+    incidentId: string;
+}> => {
     try {
         const { data: { user } } = await supabase.auth.getUser();
         
@@ -115,13 +118,17 @@ export const createTheftReport = async (report: InitialTheftReport): Promise<Tim
             throw timelineError;
         }
 
+        // Return both the marker and the incident ID
         return {
-            id: timeline.id,  // Use the timeline entry's ID
-            longitude: report.location.longitude,
-            latitude: report.location.latitude,
-            type: 'THEFT',
-            timestamp: report.timeOfTheft,
-            entry_order: 1
+            marker: {
+                id: timeline.id,  // Use the timeline entry's ID
+                longitude: report.location.longitude,
+                latitude: report.location.latitude,
+                type: 'THEFT',
+                timestamp: report.timeOfTheft,
+                entry_order: 1
+            },
+            incidentId: incident.id  // Return the incident ID separately
         };
     } catch (error) {
         console.error('Error creating theft report:', error);

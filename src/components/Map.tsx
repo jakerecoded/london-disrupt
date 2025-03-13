@@ -371,10 +371,17 @@ export default function MapComponent() {
       setIsLoading(true);
       setError(null);
       
-      const newMarker = await createTheftReport(details);
-      console.log('Created new theft report:', newMarker);
+      const result = await createTheftReport(details);
+      console.log('Created new theft report:', result);
       
-      setCurrentIncidentId(newMarker.id);
+      // Set the current incident ID using the correct incidentId property
+      setCurrentIncidentId(result.incidentId);
+      
+      // Use the marker directly from the result
+      const newMarker = result.marker;
+      
+      // Immediately update the theft locations with the new marker to ensure it's visible
+      console.log('Adding marker to theftLocations immediately:', newMarker);
       setTheftLocations([newMarker]);
       setDialogOpen(false);
 
@@ -389,6 +396,27 @@ export default function MapComponent() {
         zoom: 14,
         duration: 2000
       });
+      
+      // Add a small delay before loading the timeline to ensure database operations complete
+      console.log('Waiting for database operations to complete before loading timeline...');
+      setTimeout(async () => {
+        try {
+          // Load the complete timeline to get the full marker data with all properties
+          const timeline = await loadFullTimeline(result.incidentId);
+          console.log('Loaded complete timeline after delay:', timeline);
+          
+          if (timeline.length > 0) {
+            // Update the theft locations with the complete data
+            console.log('Updating theftLocations with complete timeline data');
+            setTheftLocations(timeline);
+          } else {
+            console.log('Timeline is empty after delay, keeping the manually created marker');
+            // Keep the manually created marker if the timeline is still empty
+          }
+        } catch (timelineError) {
+          console.error('Error loading timeline after delay:', timelineError);
+        }
+      }, 1000); // 1 second delay
     } catch (error) {
       console.error('Failed to create theft report:', error);
       setError('Failed to create theft report');
