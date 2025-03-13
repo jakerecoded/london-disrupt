@@ -658,3 +658,24 @@ export const loadUserIncidents = async (): Promise<TheftIncident[]> => {
         throw error;
     }
 };
+
+export const loadTheftHeatMapData = async (): Promise<{
+    longitude: number;
+    latitude: number;
+    timestamp: string;
+}[]> => {
+    try {
+        // Fetch theft points from Supabase
+        const { data, error } = await supabase
+            .from('aggregated_theft_routes')
+            .select('longitude, latitude, timestamp')
+            .eq('type', 'THEFT');
+            
+        if (error) throw error;
+        
+        return data || [];
+    } catch (error) {
+        console.error('Error loading theft heat map data:', error);
+        throw error;
+    }
+};

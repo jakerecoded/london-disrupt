@@ -5,6 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { loadRoutes } from '../services/routeService';
 import { Route } from '../types/route';
 import RouteDisplay from './RouteDisplay';
+import HeatMapDisplay from './HeatMapDisplay';
 import AnalyticsToolbar from './AnalyticsToolbar';
 import styles from './RouteDisplay.module.css';
 
@@ -18,8 +19,7 @@ export default function Analytics() {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // This state will be used in future tickets to control what is displayed on the map
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // State to control what is displayed on the map
   const [activeView, setActiveView] = useState(0); // 0: routes, 1: heatmap, 2: storage sites
   
   // Fetch routes on component mount and periodically refresh
@@ -59,8 +59,12 @@ export default function Analytics() {
     >
       <NavigationControl position="bottom-right" />
       
-      {/* Render routes */}
-      <RouteDisplay routes={routes} mapRef={mapRef} />
+      {/* Conditionally render based on activeView */}
+      {activeView === 0 ? (
+        <RouteDisplay routes={routes} mapRef={mapRef} />
+      ) : activeView === 1 ? (
+        <HeatMapDisplay mapRef={mapRef} />
+      ) : null}
       
       {/* Analytics Toolbar */}
       <AnalyticsToolbar onViewChange={setActiveView} />
