@@ -12,9 +12,11 @@ interface MapMarkerProps {
   scale?: number;
   onClick?: () => void;
   onDelete?: () => void;
+  isLastPathPoint?: boolean;
+  isDrawingPath?: boolean;
 }
 
-function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) {
+function MapMarker({ marker, scale = 1.05, onClick, onDelete, isLastPathPoint = false, isDrawingPath = false }: MapMarkerProps) {
   const [showPopup, setShowPopup] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isTooltipHovered, setIsTooltipHovered] = useState(false);
@@ -140,7 +142,9 @@ function MapMarker({ marker, scale = 1.05, onClick, onDelete }: MapMarkerProps) 
           scale={0.5}
         >
           <div 
-            className="w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm cursor-pointer"
+            className={`w-3 h-3 bg-blue-400 rounded-full border-2 border-white shadow-sm cursor-pointer ${
+              isLastPathPoint && isDrawingPath ? 'animate-pulse ring-4 ring-blue-500 ring-opacity-75' : ''
+            }`}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}

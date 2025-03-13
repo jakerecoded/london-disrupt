@@ -702,12 +702,16 @@ export default function MapComponent() {
         })()}
 
         {/* 2. Render path markers (middle layer) */}
-        {theftLocations
-          .filter(marker => marker.type === 'PATH')
-          .map(marker => (
+        {(() => {
+          const pathMarkers = theftLocations.filter(marker => marker.type === 'PATH');
+          const lastPathMarkerIndex = pathMarkers.length - 1;
+          
+          return pathMarkers.map((marker, index) => (
             <MapMarker
               key={marker.id}
               marker={marker}
+              isLastPathPoint={index === lastPathMarkerIndex}
+              isDrawingPath={isDrawingPath}
               onClick={() => {
                 if (isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.()) {
                   window.pathDrawerMethods.handleStartMarkerSelect?.(marker);
@@ -723,7 +727,8 @@ export default function MapComponent() {
                 }
               }}
             />
-          ))}
+          ));
+        })()}
 
         {/* 3. Render other markers (top layer) */}
         {theftLocations
@@ -756,9 +761,11 @@ export default function MapComponent() {
           onCancel={() => setIsDrawingPath(false)}
         />
 
-        {isDrawingPath && window.pathDrawerMethods?.isSelectingStart?.() && (
+        {isDrawingPath && (
           <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-10">
-            Click on a marker to start the path
+            {window.pathDrawerMethods?.isSelectingStart?.() 
+              ? "Select where you want the route to start, and then press Enter to finish."
+              : "Select where you want the route to start, and then press Enter to finish."}
           </div>
         )}
 
