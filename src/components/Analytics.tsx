@@ -5,6 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { loadRoutes } from '../services/routeService';
 import { Route } from '../types/route';
 import RouteDisplay from './RouteDisplay';
+import AnalyticsToolbar from './AnalyticsToolbar';
 import styles from './RouteDisplay.module.css';
 
 export default function Analytics() {
@@ -17,6 +18,9 @@ export default function Analytics() {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // This state will be used in future tickets to control what is displayed on the map
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [activeView, setActiveView] = useState(0); // 0: routes, 1: heatmap, 2: storage sites
   
   // Fetch routes on component mount and periodically refresh
   useEffect(() => {
@@ -57,6 +61,9 @@ export default function Analytics() {
       
       {/* Render routes */}
       <RouteDisplay routes={routes} mapRef={mapRef} />
+      
+      {/* Analytics Toolbar */}
+      <AnalyticsToolbar onViewChange={setActiveView} />
       
       {isLoading && (
         <div className={styles.loadingOverlay}>

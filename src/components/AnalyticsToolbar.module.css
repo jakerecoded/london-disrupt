@@ -1,0 +1,43 @@
+.toolbarContainer {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(0deg, rgba(22,35,46,1) 0%, rgba(21,26,29,1) 100%);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  padding: 1rem;
+}
+
+.actionButton {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s;
+  background-color: linear-gradient(0deg, rgba(22,35,46,1) 0%, rgba(21,26,29,1) 100%);
+  color: rgb(55 65 81);
+}
+
+.actionButton:hover:not(.actionButton--disabled) {
+  background-color: #283746;
+}
+
+.actionButton--active {
+  background-color: rgb(59 130 246);
+  color: white;
+}
+
+.actionButton--disabled {
+  background-color: rgb(146, 14, 20, 0.60);
+  color: rgb(156 163 175);
+  cursor: not-allowed;
+}
+
+.actionIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
