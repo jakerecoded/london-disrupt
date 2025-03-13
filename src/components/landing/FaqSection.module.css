@@ -3,18 +3,20 @@
   padding-bottom: calc(var(--mantine-spacing-xl) * 1);
   margin-bottom: calc(var(--mantine-spacing-xl) * 1);
   background-color: #f8f9fa;
-  min-width: 1280px;
+  min-width: 1320px;
+  border-radius: 5px;
 }
 
 .title {
   margin-bottom: calc(var(--mantine-spacing-xl) * 1.5);
   color: #16232e;
   font-weight: 900;
+  padding-bottom: 0.5em;
 }
 
 .item {
   border-radius: var(--mantine-radius-md);
   margin-bottom: var(--mantine-spacing-lg);
-  border: 1px solid var(--mantine-color-gray-3);
+  border: 5px solid var(--mantine-color-gray-3);
   background-color: var(--mantine-color-white);
 }
