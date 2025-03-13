@@ -15,7 +15,7 @@ export function HeroSection() {
         <div className={classes.inner}>
           <div className={classes.content}>
             <Title className={classes.title}>
-              Track and{' '}
+              Track and help police{' '}
               <Text
                 component="span"
                 inherit
@@ -24,13 +24,16 @@ export function HeroSection() {
               >
                 recover
               </Text>{' '}
-              stolen phones in London
+              stolen phones in London by plotting the route they took.
             </Title>
 
             <Text className={classes.description} mt={30} c="white">
-              Our platform helps you track phone theft incidents, analyze patterns, and increase
-              the chances of recovering your stolen phone with advanced mapping and analytics tools
+              snatchback.London is a forever free platform to manually plot location data from your stolen device
+              to crowdsource intelligence on where phones are being stolen, where they're moving to, and where they're
+              being stored across London.
             </Text>
+
+            <Text className={classes.title} mt={30} fw={700} c="white">With a detailed picture that we all create, we can put the Met on the front foot.</Text>
 
             <Button
               variant="gradient"
