@@ -45,6 +45,19 @@ function LandingPage() {
               variant="gradient" 
               gradient={{ from: 'cyan', to: 'blue', deg: 72 }}
               onClick={handleButtonClick}
+              style={{
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                const target = e.currentTarget;
+                target.style.transform = 'scale(1.05)';
+                target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                const target = e.currentTarget;
+                target.style.transform = 'scale(1)';
+                target.style.boxShadow = 'none';
+              }}
             >
               {user ? 'Go to home' : 'Login'}
             </Button>
