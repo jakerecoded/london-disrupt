@@ -6,6 +6,7 @@ import { loadRoutes } from '../services/routeService';
 import { Route } from '../types/route';
 import RouteDisplay from './RouteDisplay';
 import HeatMapDisplay from './HeatMapDisplay';
+import StorageSitesDisplay from './StorageSitesDisplay';
 import AnalyticsToolbar from './AnalyticsToolbar';
 import styles from './RouteDisplay.module.css';
 
@@ -64,6 +65,8 @@ export default function Analytics() {
         <RouteDisplay routes={routes} mapRef={mapRef} />
       ) : activeView === 1 ? (
         <HeatMapDisplay mapRef={mapRef} />
+      ) : activeView === 2 ? (
+        <StorageSitesDisplay mapRef={mapRef} />
       ) : null}
       
       {/* Analytics Toolbar */}

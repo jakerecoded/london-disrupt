@@ -679,3 +679,24 @@ export const loadTheftHeatMapData = async (): Promise<{
         throw error;
     }
 };
+
+export const loadStorageSitesData = async (): Promise<{
+    longitude: number;
+    latitude: number;
+    timestamp: string;
+}[]> => {
+    try {
+        // Fetch holding points from Supabase
+        const { data, error } = await supabase
+            .from('aggregated_theft_routes')
+            .select('longitude, latitude, timestamp')
+            .eq('type', 'HOLDING');
+            
+        if (error) throw error;
+        
+        return data || [];
+    } catch (error) {
+        console.error('Error loading storage sites data:', error);
+        throw error;
+    }
+};
