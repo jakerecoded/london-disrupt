@@ -1,18 +1,12 @@
 // src/components/HeatMapDisplay.tsx
 import { useEffect, useState } from 'react';
-import { Source, Layer, MapRef } from 'react-map-gl';
+import { Source, Layer } from 'react-map-gl';
 import { Loader } from '@mantine/core';
 import { loadTheftHeatMapData } from '../services/theftService';
 import styles from './RouteDisplay.module.css';
 
-interface HeatMapDisplayProps {
-  mapRef: React.RefObject<MapRef>;
-}
+export default function HeatMapDisplay() {
 
-export default function HeatMapDisplay({ mapRef }: HeatMapDisplayProps) {
-  // We're not directly using mapRef in this component, but it's passed in
-  // for potential future use, such as fitting the map to the data bounds
-  // or for other map interactions
   const [theftData, setTheftData] = useState<{
     longitude: number;
     latitude: number;

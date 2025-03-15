@@ -64,7 +64,7 @@ export default function Analytics() {
       {activeView === 0 ? (
         <RouteDisplay routes={routes} mapRef={mapRef} />
       ) : activeView === 1 ? (
-        <HeatMapDisplay mapRef={mapRef} />
+        <HeatMapDisplay />
       ) : activeView === 2 ? (
         <StorageSitesDisplay mapRef={mapRef} />
       ) : null}
